@@ -1,0 +1,9 @@
+{
+  "domain": "ecovacs",
+  "name": "Ecovacs Bumper",
+  "documentation": "https://www.home-assistant.io/integrations/ecovacs",
+  "requirements": [""],
+  "codeowners": ["@OverloadUT", "@mib1185"],
+  "iot_class": "cloud_push",
+  "loggers": ["sleekxmppfs", "sucksbumper"]
+}
