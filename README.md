@@ -16,7 +16,7 @@ Drop the ecovacs folder into your custom_components folder.  If I polish this up
 Restart HASS.
 
 In your configuration.yaml:
-'''
+```
 ecovacs:
   username: 
   password: 
@@ -25,11 +25,11 @@ ecovacs:
   bumper: true/false (optional, defaults false)
   bumper_server: (optional, defaults null)
   verify_ssl: true/false, false if using bumper (optional, defaults true)
-'''
+```
 Any username, password, country, and continent should work if bumper is true.  Set bumper_server to the ip_address where you're running bumper and set verify_ssl to false for bumper.  If you're not using bumper this SHOULD technically work no different than the Home Assistant ecovacs integration but I haven't looked at it enough to be sure and I haven't tested it.
 
 ### Example Config
-'''
+```
 ecovacs:
   username: bumper
   password: bumper
@@ -38,5 +38,5 @@ ecovacs:
   bumper: true
   bumper_server: "192.168.1.55"
   verify_ssl: false
-'''
+```
 Just finished getting this working late 12/13/22 so not sure if everything works yet but will commit changes here if I update it or at least document issues.
