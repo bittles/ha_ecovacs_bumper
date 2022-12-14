@@ -1,0 +1,1 @@
+# Ecovacs custom component with bumper support for home assistant to replace built in one
