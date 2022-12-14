@@ -5,9 +5,15 @@ Works with bumper with my N79 and should work with at least other XMPP based eco
 
 Should work as regular if bumper isn't used in config but haven't tested yet, goal was to get it all local.  Maybe mess around and test it in future.
 
-I'm using the docker-compose example for bumper by bmartin5692, https://github.com/bmartin5692/bumper
+I'm using the docker-compose example for bumper by bmartin5692, https://github.com/bmartin5692/bumper on an odroid-n2+.
 
-For DNS routing I have an Asus AX88u with asus-merlin installed running Adguard.  DNS rewrites of *.ecouser.net, *.ecovacs.com, and *.ecovacs.net pointing to my bumper server.
+For DNS routing I have an Asus AX88u with asus-merlin installed running Adguard.  DNS rewrites in AdGuard for domains:
+```
+*.ecouser.net
+*.ecovacs.com
+*.ecovacs.net 
+```
+pointing to my bumper server.
 
 Big credits to bmartin5692 for his fork of sucks to base this off of as well.
 
