@@ -3,13 +3,14 @@ import logging
 import random
 import string
 
+#just included the modified sucks in component
 from .sucksbumper import EcoVacsAPI, VacBot
 import voluptuous as vol
 
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_USERNAME,
-    CONF_VERIFY_SSL,
+    CONF_VERIFY_SSL, # added
     EVENT_HOMEASSISTANT_STOP,
     Platform,
 )
@@ -24,10 +25,10 @@ DOMAIN = "ecovacs"
 
 CONF_COUNTRY = "country"
 CONF_CONTINENT = "continent"
+#bumper config vars
 CONF_BUMPER = "bumper"
 CONF_BUMPER_SERVER = "bumper_server"
 server_address = None
-
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -39,7 +40,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_CONTINENT): vol.All(vol.Lower, cv.string),
                 vol.Optional(CONF_BUMPER, default=False): cv.boolean,
                 vol.Optional(CONF_BUMPER_SERVER): cv.string,
-                vol.Optional(CONF_VERIFY_SSL, default=True): cv.boolean,
+                vol.Optional(CONF_VERIFY_SSL, default=True): cv.boolean, # can probably get rid of this and set verify ssl false if bumper true
             }
         )
     },
@@ -53,14 +54,15 @@ ECOVACS_API_DEVICEID = "".join(
     random.choice(string.ascii_uppercase + string.digits) for _ in range(8)
 )
 
-
 def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Ecovacs component."""
     _LOGGER.debug("Creating new Ecovacs component")
 
     hass.data[ECOVACS_DEVICES] = []
+    # if we're using bumper then define the server address
     if CONF_BUMPER == True:
         server_address = (config[DOMAIN].get(CONF_BUMPER_SERVER), 5223)
+    # if not make sure it's null
     else:
         server_address = None
 
@@ -70,7 +72,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
         EcoVacsAPI.md5(config[DOMAIN].get(CONF_PASSWORD)),
         config[DOMAIN].get(CONF_COUNTRY),
         config[DOMAIN].get(CONF_CONTINENT),
-        config[DOMAIN].get(CONF_VERIFY_SSL),
+        config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
     )
 
     devices = ecovacs_api.devices()
@@ -89,8 +91,8 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
             ecovacs_api.user_access_token,
             device,
             config[DOMAIN].get(CONF_CONTINENT).lower(),
-            server_address,
-            config[DOMAIN].get(CONF_VERIFY_SSL),
+            server_address, # include server address in class, if it's null shoul be no effect
+            config[DOMAIN].get(CONF_VERIFY_SSL), # verify ssl or not
             monitor=True,
         )
         hass.data[ECOVACS_DEVICES].append(vacbot)

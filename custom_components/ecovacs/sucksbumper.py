@@ -376,11 +376,13 @@ class EventListener(object):
         self._emitter.unsubscribe(self)
 
 class VacBot():
+    # switched verify and monitor just to be consistent
     def __init__(self, user, domain, resource, secret, vacuum, continent, server_address=None, verify_ssl=True, monitor=False):
 
         self.vacuum = vacuum
 
         self.server_address = server_address
+
         # If True, the VacBot object will handle keeping track of all statuses,
         # including the initial request for statuses, and new requests after the
         # VacBot returns from being offline. It will also cause it to regularly
@@ -411,9 +413,11 @@ class VacBot():
         self.iotmq = None
 
         if not vacuum['iotmq']:
+            # if server is defined then use bmartins init example for using sucks library in his docs; couldnt get this to work in hass with code he had here though, maybe not referencing everything right in component init
             if self.server_address is not None:
                 vacuum = {"did": "none", "class": "none"}
                 super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
+            # should work with ecovacs servers but 1) havent tested with my changes and 2) havent tested with bmartins changes
             else:
                 self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
                 #Uncomment line to allow unencrypted plain auth
@@ -431,11 +435,13 @@ class VacBot():
             #self.xmpp.subscribe_to_ctls(self._handle_ctl)            
 
     def connect_and_wait_until_ready(self):
+        # use bmartins exmaple if defining our own server, couldn't get this to work without defining, probably xmpp port but idk
         if self.server_address:
             logging.info("connecting")
             self.xmpp.connect(self.server_address)
             self.xmpp.process()
             self.xmpp.wait_until_ready()
+        # keep rest of bmartins fork intact
         else:
             if not self.vacuum['iotmq']:
                 self.xmpp.connect_and_wait_until_ready()
