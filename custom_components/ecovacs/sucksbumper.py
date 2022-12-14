@@ -376,10 +376,11 @@ class EventListener(object):
         self._emitter.unsubscribe(self)
 
 class VacBot():
-    def __init__(self, user, domain, resource, secret, vacuum, continent, server_address=None, monitor=False, verify_ssl=True):
+    def __init__(self, user, domain, resource, secret, vacuum, continent, server_address=None, verify_ssl=True, monitor=False):
 
         self.vacuum = vacuum
 
+        self.server_address = server_address
         # If True, the VacBot object will handle keeping track of all statuses,
         # including the initial request for statuses, and new requests after the
         # VacBot returns from being offline. It will also cause it to regularly
@@ -410,10 +411,14 @@ class VacBot():
         self.iotmq = None
 
         if not vacuum['iotmq']:
-            self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
-            #Uncomment line to allow unencrypted plain auth
-            #self.xmpp['feature_mechanisms'].unencrypted_plain = True
-            self.xmpp.subscribe_to_ctls(self._handle_ctl)            
+            if self.server_address is not None:
+                vacuum = {"did": "none", "class": "none"}
+                super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
+            else:
+                self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
+                #Uncomment line to allow unencrypted plain auth
+                #self.xmpp['feature_mechanisms'].unencrypted_plain = True
+                self.xmpp.subscribe_to_ctls(self._handle_ctl)            
         
         else:            
             self.iotmq = EcoVacsIOTMQ(user, domain, resource, secret, continent, vacuum, server_address, verify_ssl=verify_ssl)            
@@ -426,21 +431,27 @@ class VacBot():
             #self.xmpp.subscribe_to_ctls(self._handle_ctl)            
 
     def connect_and_wait_until_ready(self):
-        if not self.vacuum['iotmq']:
-            self.xmpp.connect_and_wait_until_ready()
-            self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
+        if self.server_address:
+            logging.info("connecting")
+            self.xmpp.connect(self.server_address)
+            self.xmpp.process()
+            self.xmpp.wait_until_ready()
         else:
-            self.iotmq.connect_and_wait_until_ready()
-            self.iotmq.schedule(30, self.send_ping)
-            #self.xmpp.connect_and_wait_until_ready() #Leaving in case xmpp is given to iotmq in the future        
-
-        if self._monitor:
-            # Do a first ping, which will also fetch initial statuses if the ping succeeds
-            self.send_ping()
-            if not self.vacuum['iotmq']:            
-                self.xmpp.schedule('Components', 3600, lambda: self.refresh_components(), repeat=True)
+            if not self.vacuum['iotmq']:
+                self.xmpp.connect_and_wait_until_ready()
+                self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
             else:
-                self.iotmq.schedule(3600,self.refresh_components)
+                self.iotmq.connect_and_wait_until_ready()
+                self.iotmq.schedule(30, self.send_ping)
+                #self.xmpp.connect_and_wait_until_ready() #Leaving in case xmpp is given to iotmq in the future        
+
+            if self._monitor:
+                # Do a first ping, which will also fetch initial statuses if the ping succeeds
+                self.send_ping()
+                if not self.vacuum['iotmq']:            
+                    self.xmpp.schedule('Components', 3600, lambda: self.refresh_components(), repeat=True)
+                else:
+                    self.iotmq.schedule(3600,self.refresh_components)
 
     def _handle_ctl(self, ctl):
         method = '_handle_' + ctl['event']

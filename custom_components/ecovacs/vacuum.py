@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import .sucksbumper
+from . import sucksbumper
 
 from homeassistant.components.vacuum import VacuumEntity, VacuumEntityFeature
 from homeassistant.core import HomeAssistant

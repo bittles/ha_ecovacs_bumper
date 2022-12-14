@@ -24,6 +24,10 @@ DOMAIN = "ecovacs"
 
 CONF_COUNTRY = "country"
 CONF_CONTINENT = "continent"
+CONF_BUMPER = "bumper"
+CONF_BUMPER_SERVER = "bumper_server"
+server_address = None
+
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -33,7 +37,9 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_PASSWORD): cv.string,
                 vol.Required(CONF_COUNTRY): vol.All(vol.Lower, cv.string),
                 vol.Required(CONF_CONTINENT): vol.All(vol.Lower, cv.string),
-                vol.Optional(CONF_VERIFY_SSL, default=DEFAULT_VERIFY_SSL): cv.boolean, 
+                vol.Optional(CONF_BUMPER, default=False): cv.boolean,
+                vol.Optional(CONF_BUMPER_SERVER): cv.string,
+                vol.Optional(CONF_VERIFY_SSL, default=True): cv.boolean,
             }
         )
     },
@@ -53,6 +59,10 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     _LOGGER.debug("Creating new Ecovacs component")
 
     hass.data[ECOVACS_DEVICES] = []
+    if CONF_BUMPER == True:
+        server_address = (config[DOMAIN].get(CONF_BUMPER_SERVER), 5223)
+    else:
+        server_address = None
 
     ecovacs_api = EcoVacsAPI(
         ECOVACS_API_DEVICEID,
@@ -79,8 +89,9 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
             ecovacs_api.user_access_token,
             device,
             config[DOMAIN].get(CONF_CONTINENT).lower(),
-            monitor=True,
+            server_address,
             config[DOMAIN].get(CONF_VERIFY_SSL),
+            monitor=True,
         )
         hass.data[ECOVACS_DEVICES].append(vacbot)
 
