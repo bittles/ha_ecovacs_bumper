@@ -83,9 +83,10 @@ CLEAN_MODE_FROM_ECOVACS = {
     'border': CLEAN_MODE_EDGE,
     'spot': CLEAN_MODE_SPOT,
     'spot_area': CLEAN_MODE_SPOT_AREA,
+    'SpotArea': CLEAN_MODE_SPOT_AREA,
     'singleroom': CLEAN_MODE_SINGLE_ROOM,
     'stop': CLEAN_MODE_STOP,
-    'going': CHARGE_MODE_RETURNING
+    'going': CHARGE_MODE_RETURNING,
 }
 
 FAN_SPEED_TO_ECOVACS = {
@@ -95,32 +96,38 @@ FAN_SPEED_TO_ECOVACS = {
 
 FAN_SPEED_FROM_ECOVACS = {
     'standard': FAN_SPEED_NORMAL,
-    'strong': FAN_SPEED_HIGH
+    'strong': FAN_SPEED_HIGH,
 }
 
 CHARGE_MODE_TO_ECOVACS = {
     CHARGE_MODE_RETURN: 'go',
     CHARGE_MODE_RETURNING: 'Going',
     CHARGE_MODE_CHARGING: 'SlotCharging',
-    CHARGE_MODE_IDLE: 'Idle'
+    CHARGE_MODE_IDLE: 'Idle',
 }
 
 CHARGE_MODE_FROM_ECOVACS = {
     'going': CHARGE_MODE_RETURNING,
+    'Going': CHARGE_MODE_RETURNING,
     'slot_charging': CHARGE_MODE_CHARGING,
-    'idle': CHARGE_MODE_IDLE
+    'SlotCharging': CHARGE_MODE_CHARGING,
+    'idle': CHARGE_MODE_IDLE,
+    'Idle': CHARGE_MODE_IDLE,
 }
 
 COMPONENT_TO_ECOVACS = {
     COMPONENT_MAIN_BRUSH: 'Brush',
     COMPONENT_SIDE_BRUSH: 'SideBrush',
-    COMPONENT_FILTER: 'DustCaseHeap'
+    COMPONENT_FILTER: 'DustCaseHeap',
 }
 
 COMPONENT_FROM_ECOVACS = {
     'brush': COMPONENT_MAIN_BRUSH,
+    'Brush': COMPONENT_MAIN_BRUSH,
     'side_brush': COMPONENT_SIDE_BRUSH,
-    'dust_case_heap': COMPONENT_FILTER
+    'SideBrush': COMPONENT_SIDE_BRUSH,
+    'dust_case_heap': COMPONENT_FILTER,
+    'DustCaseHeap': COMPONENT_FILTER,
 }
 
 def str_to_bool_or_cert(s):
