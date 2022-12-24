@@ -490,6 +490,7 @@ class VacBot():
 
         if 'val' in event:
             lifespan = int(event['val']) / 100
+            _LOGGER.debug("**********Component " + type + " has lifespan of " + lifespan + ".")
         else:
             lifespan = int(event['left']) / 60  #This works for a D901
         self.components[type] = lifespan
