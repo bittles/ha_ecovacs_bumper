@@ -490,7 +490,6 @@ class VacBot():
 
         if 'val' in event:
             lifespan = int(event['val']) / 100
-            _LOGGER.debug("**********Component " + type + " has lifespan of " + lifespan + ".")
         else:
             lifespan = int(event['left']) / 60  #This works for a D901
         self.components[type] = lifespan
@@ -937,7 +936,6 @@ class EcoVacsXMPP(ClientXMPP):
 
     def _ctl_to_dict(self, xml):
         result = xml.attrib.copy()
-        _LOGGER.debug("result from xml is : " + result)
         if 'td' not in result:
             # This happens for commands with no response data, such as PlaySound
             return
