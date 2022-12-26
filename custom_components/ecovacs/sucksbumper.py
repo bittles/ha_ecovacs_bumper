@@ -931,6 +931,11 @@ class EcoVacsXMPP(ClientXMPP):
     def _handle_ctl(self, message):
         the_good_part = message.get_payload()[0][0]
         as_dict = self._ctl_to_dict(the_good_part)
+        
+        _LOGGER.debug("handle_ctl called with as_dict:")
+        _LOGGER.debug(as_dict)
+        _LOGGER.debug("end of as_dict")
+        
         if as_dict is not None:
             for s in self.ctl_subscribers:
                 s(as_dict)
@@ -940,7 +945,9 @@ class EcoVacsXMPP(ClientXMPP):
         _LOGGER.debug("result from xml is :")
         _LOGGER.debug(result)
         _LOGGER.debug("end of result")
+        
         if 'td' in result:
+            
             result['event'] = result.pop('td')
             if xml:
                 result.update(xml[0].attrib)
@@ -948,6 +955,10 @@ class EcoVacsXMPP(ClientXMPP):
             for key in result:
                 if not RepresentsInt(result[key]): #Fix to handle negative int values
                     result[key] = stringcase.snakecase(result[key])
+            
+            _LOGGER.debug("td detected in result and result is:")
+            _LOGGER.debug(result)
+            _LOGGER.debug("end of td detect result")
             
             return result
 
@@ -960,10 +971,17 @@ class EcoVacsXMPP(ClientXMPP):
                 if not RepresentsInt(result[key]): #Fix to handle negative int values
                     result[key] = stringcase.snakecase(result[key])
             
+            _LOGGER.debug("type detected in result and result is:")
+            _LOGGER.debug(result)
+            _LOGGER.debug("end of type detect result")
+            
             return result
 
         else:
             # This happens for commands with no response data, such as PlaySound
+            _LOGGER.debug("neither type nor td in result:")
+            _LOGGER.debug(result)
+            _LOGGER.debug("end of no td or type detect result")
             return
 
     def register_callback(self, userdata, message):
