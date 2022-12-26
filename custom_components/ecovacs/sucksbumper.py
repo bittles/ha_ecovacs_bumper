@@ -482,7 +482,17 @@ class VacBot():
             _LOGGER.debug("*** error = " + error)
 
     def _handle_life_span(self, event):
+    
+        _LOGGER.debug("_handle_life_span called, event is: ")
+        _LOGGER.debug(event)
+        _LOGGER.debug("event shown now continue with handle life span")
+        
         type = event['type']
+        
+        _LOGGER.debug("type in handle life span: ")
+        _LOGGER.debug(type)
+        _LOGGER.debug("type shown now continue with handle life span")
+        
         try:
             type = COMPONENT_FROM_ECOVACS[type]
         except KeyError:
