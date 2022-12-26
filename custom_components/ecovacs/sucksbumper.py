@@ -962,7 +962,7 @@ class EcoVacsXMPP(ClientXMPP):
             
             return result
 
-        else
+        else:
             # This happens for commands with no response data, such as PlaySound
             return
 
