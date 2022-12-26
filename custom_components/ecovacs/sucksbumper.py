@@ -940,19 +940,31 @@ class EcoVacsXMPP(ClientXMPP):
         _LOGGER.debug("result from xml is :")
         _LOGGER.debug(result)
         _LOGGER.debug("end of result")
-        if 'td' not in result:
+        if 'td' in result:
+            result['event'] = result.pop('td')
+            if xml:
+                result.update(xml[0].attrib)
+
+            for key in result:
+                if not RepresentsInt(result[key]): #Fix to handle negative int values
+                    result[key] = stringcase.snakecase(result[key])
+            
+            return result
+
+        elif 'type' in result:
+            result['event'] = result.pop('type')
+            if xml:
+                result.update(xml[0].attrib)
+
+            for key in result:
+                if not RepresentsInt(result[key]): #Fix to handle negative int values
+                    result[key] = stringcase.snakecase(result[key])
+            
+            return result
+
+        else
             # This happens for commands with no response data, such as PlaySound
             return
-
-        result['event'] = result.pop('td')
-        if xml:
-            result.update(xml[0].attrib)
-
-        for key in result:
-            if not RepresentsInt(result[key]): #Fix to handle negative int values
-                result[key] = stringcase.snakecase(result[key])
-            
-        return result
 
     def register_callback(self, userdata, message):
 
