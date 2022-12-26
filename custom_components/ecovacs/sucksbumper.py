@@ -937,7 +937,9 @@ class EcoVacsXMPP(ClientXMPP):
 
     def _ctl_to_dict(self, xml):
         result = xml.attrib.copy()
-        _LOGGER.debug("result from xml is : " + ET.tostring(result))
+        _LOGGER.debug("result from xml is :")
+        _LOGGER.debug(result)
+        _LOGGER.debug("end of result")
         if 'td' not in result:
             # This happens for commands with no response data, such as PlaySound
             return
