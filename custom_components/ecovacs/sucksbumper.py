@@ -424,6 +424,8 @@ class VacBot():
             if self.server_address is not None:
                 vacuum = {"did": "none", "class": "none"}
                 super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
+                self.xmpp = EcoVacsXMPP("sucks", "ecouser.net", "", "", "", vacuum, server_address)
+                self.xmpp.subscribe_to_ctls(self._handle_ctl) 
             # should work with ecovacs servers but 1) havent tested with my changes and 2) havent tested with bmartins changes
             else:
                 self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
