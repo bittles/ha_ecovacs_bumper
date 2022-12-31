@@ -953,7 +953,7 @@ class EcoVacsXMPP(ClientXMPP):
             other_dict = self._ctl_to_dict(the_other_part)
             _LOGGER.debug("handle_ctl called with[0][1] the other part:")
             _LOGGER.debug(the_other_part)
-            _LOGGER.debug("other dict:"
+            _LOGGER.debug("other dict:")
             _LOGGER.debug(other_dict)
             _LOGGER.debug("end of the_other_part")
 
@@ -962,7 +962,7 @@ class EcoVacsXMPP(ClientXMPP):
             another_dict = self._ctl_to_dict(the_another_part)
             _LOGGER.debug("handle_ctl called with[1][0] the another part:")
             _LOGGER.debug(the_another_part)
-            _LOGGER.debug("another dict:"
+            _LOGGER.debug("another dict:")
             _LOGGER.debug(another_dict)
             _LOGGER.debug("end of the_another_part")
         
