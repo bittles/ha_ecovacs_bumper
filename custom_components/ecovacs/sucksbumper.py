@@ -982,7 +982,7 @@ class EcoVacsXMPP(ClientXMPP):
         elif 'type' in result:
 #            result['event'] = result.pop('type')
             if 'errno' in result:
-                if result['errno'] = '':
+                if result['errno'] == '':
                     result['errno'] = 'handle_life_span'
                     result['event'] = result.pop('errno')
                     if xml:
