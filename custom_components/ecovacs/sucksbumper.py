@@ -450,6 +450,7 @@ class VacBot():
 #            self.xmpp.connect(self.server_address)
 #            self.xmpp.process()
             self.xmpp.connect_and_wait_until_ready()
+            self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
         # keep rest of bmartins fork intact
         else:
             if not self.vacuum['iotmq']:
@@ -469,7 +470,11 @@ class VacBot():
                     self.iotmq.schedule(3600,self.refresh_components)
 
     def _handle_ctl(self, ctl):
+        _LOGGER.debug("super handle_ctl called with ctl:")
+        _LOGGER.debug(ctl)
         method = '_handle_' + ctl['event']
+        _LOGGER.debug("method assigned:")
+        _LOGGER.debug(method)
         if hasattr(self, method):
             getattr(self, method)(ctl)
 
@@ -1158,6 +1163,7 @@ class GetBatteryState(VacBotCommand):
 
 class GetLifeSpan(VacBotCommand):
     def __init__(self, component):
+        _LOGGER.debug("GetLifeSpan called by VacBot**************")
         super().__init__('GetLifeSpan', {'type': COMPONENT_TO_ECOVACS[component]})
 
 
