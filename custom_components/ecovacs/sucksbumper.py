@@ -423,7 +423,7 @@ class VacBot():
             # if server is defined then use bmartins init example for using sucks library in his docs; couldnt get this to work in hass with code he had here though, maybe not referencing everything right in component init
             if self.server_address is not None:
                 vacuum = {"did": "none", "class": "none"}
-                super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
+  #              super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
                 self.xmpp = EcoVacsXMPP("sucks", "ecouser.net", "", "", "", vacuum, server_address)
                 self.xmpp.subscribe_to_ctls(self._handle_ctl) 
             # should work with ecovacs servers but 1) havent tested with my changes and 2) havent tested with bmartins changes
@@ -447,9 +447,9 @@ class VacBot():
         # use bmartins exmaple if defining our own server, couldn't get this to work without defining, probably xmpp port but idk
         if self.server_address:
             logging.info("connecting")
-            self.xmpp.connect(self.server_address)
-            self.xmpp.process()
-            self.xmpp.wait_until_ready()
+#            self.xmpp.connect(self.server_address)
+#            self.xmpp.process()
+            self.xmpp.connect_and_wait_until_ready()
         # keep rest of bmartins fork intact
         else:
             if not self.vacuum['iotmq']:
