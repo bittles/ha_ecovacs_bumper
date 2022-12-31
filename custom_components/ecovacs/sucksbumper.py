@@ -470,11 +470,11 @@ class VacBot():
                     self.iotmq.schedule(3600,self.refresh_components)
 
     def _handle_ctl(self, ctl):
-        _LOGGER.debug("super handle_ctl called with ctl:")
-        _LOGGER.debug(ctl)
+#        _LOGGER.debug("super handle_ctl called with ctl:")
+#        _LOGGER.debug(ctl)
         method = '_handle_' + ctl['event']
-        _LOGGER.debug("method assigned:")
-        _LOGGER.debug(method)
+#        _LOGGER.debug("method assigned:")
+#        _LOGGER.debug(method)
         if hasattr(self, method):
             getattr(self, method)(ctl)
 
@@ -490,15 +490,15 @@ class VacBot():
 
     def _handle_life_span(self, event):
     
-        _LOGGER.debug("_handle_life_span called, event is: ")
-        _LOGGER.debug(event)
-        _LOGGER.debug("event shown now continue with handle life span")
+#        _LOGGER.debug("_handle_life_span called, event is: ")
+#        _LOGGER.debug(event)
+#        _LOGGER.debug("event shown now continue with handle life span")
         
         type = event['type']
         
-        _LOGGER.debug("type in handle life span: ")
-        _LOGGER.debug(type)
-        _LOGGER.debug("type shown now continue with handle life span")
+#        _LOGGER.debug("type in handle life span: ")
+#        _LOGGER.debug(type)
+#        _LOGGER.debug("type shown now continue with handle life span")
         
         try:
             type = COMPONENT_FROM_ECOVACS[type]
@@ -949,9 +949,9 @@ class EcoVacsXMPP(ClientXMPP):
         the_good_part = message.get_payload()[0][0]
         as_dict = self._ctl_to_dict(the_good_part)
         
-        _LOGGER.debug("handle_ctl called with as_dict:")
-        _LOGGER.debug(as_dict)
-        _LOGGER.debug("end of as_dict")
+#        _LOGGER.debug("handle_ctl called with as_dict:")
+#        _LOGGER.debug(as_dict)
+#        _LOGGER.debug("end of as_dict")
         
         if as_dict is not None:
             for s in self.ctl_subscribers:
@@ -959,9 +959,9 @@ class EcoVacsXMPP(ClientXMPP):
 
     def _ctl_to_dict(self, xml):
         result = xml.attrib.copy()
-        _LOGGER.debug("result from xml is :")
-        _LOGGER.debug(result)
-        _LOGGER.debug("end of result")
+#        _LOGGER.debug("result from xml is :")
+#        _LOGGER.debug(result)
+#        _LOGGER.debug("end of result")
         
         if 'td' in result:
             
@@ -973,9 +973,9 @@ class EcoVacsXMPP(ClientXMPP):
                 if not RepresentsInt(result[key]): #Fix to handle negative int values
                     result[key] = stringcase.snakecase(result[key])
             
-            _LOGGER.debug("td detected in result and result is:")
-            _LOGGER.debug(result)
-            _LOGGER.debug("end of td detect result")
+#            _LOGGER.debug("td detected in result and result is:")
+#            _LOGGER.debug(result)
+#            _LOGGER.debug("end of td detect result")
             
             return result
 
@@ -992,9 +992,9 @@ class EcoVacsXMPP(ClientXMPP):
                         if not RepresentsInt(result[key]): #Fix to handle negative int values
                             result[key] = stringcase.snakecase(result[key])
 
-                    _LOGGER.debug("type detected in result and result is:")
-                    _LOGGER.debug(result)
-                    _LOGGER.debug("end of type detect result")
+#                    _LOGGER.debug("type detected in result and result is:")
+#                    _LOGGER.debug(result)
+#                    _LOGGER.debug("end of type detect result")
 
                     return result
 
@@ -1167,7 +1167,7 @@ class GetBatteryState(VacBotCommand):
 
 class GetLifeSpan(VacBotCommand):
     def __init__(self, component):
-        _LOGGER.debug("GetLifeSpan called by VacBot**************")
+#        _LOGGER.debug("GetLifeSpan called by VacBot**************")
         super().__init__('GetLifeSpan', {'type': COMPONENT_TO_ECOVACS[component]})
 
 

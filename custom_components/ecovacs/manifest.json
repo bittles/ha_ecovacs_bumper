@@ -1,7 +1,7 @@
 {
   "domain": "ecovacs",
   "name": "Ecovacs Bumper",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "documentation": "https://www.home-assistant.io/integrations/ecovacs",
   "requirements": ["sleekxmppfs==1.4.1", "click>=6", "requests>=2.18", "pycryptodome>=3.4", "pycountry-convert>=0.5", "paho-mqtt>=1.4", "stringcase>=1.2"],
   "codeowners": ["@OverloadUT", "@mib1185"],
