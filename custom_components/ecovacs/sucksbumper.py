@@ -948,23 +948,23 @@ class EcoVacsXMPP(ClientXMPP):
     def _handle_ctl(self, message):
         the_good_part = message.get_payload()[0][0]
         as_dict = self._ctl_to_dict(the_good_part)
-        if message.get_payload()[0][1]:
-            the_other_part = message.get_payload()[0][1]
-            other_dict = self._ctl_to_dict(the_other_part)
-            _LOGGER.debug("handle_ctl called with[0][1] the other part:")
-            _LOGGER.debug(the_other_part)
-            _LOGGER.debug("other dict:")
-            _LOGGER.debug(other_dict)
-            _LOGGER.debug("end of the_other_part")
+#        if message.get_payload()[0][1]:
+#            the_other_part = message.get_payload()[0][1]
+#            other_dict = self._ctl_to_dict(the_other_part)
+#            _LOGGER.debug("handle_ctl called with[0][1] the other part:")
+#            _LOGGER.debug(the_other_part)
+#            _LOGGER.debug("other dict:")
+#            _LOGGER.debug(other_dict)
+#            _LOGGER.debug("end of the_other_part")
 
-        if message.get_payload()[1][0]:
-            the_another_part = message.get_payload()[1][0]
-            another_dict = self._ctl_to_dict(the_another_part)
-            _LOGGER.debug("handle_ctl called with[1][0] the another part:")
-            _LOGGER.debug(the_another_part)
-            _LOGGER.debug("another dict:")
-            _LOGGER.debug(another_dict)
-            _LOGGER.debug("end of the_another_part")
+#        if message.get_payload()[1][0]:
+#            the_another_part = message.get_payload()[1][0]
+#            another_dict = self._ctl_to_dict(the_another_part)
+#            _LOGGER.debug("handle_ctl called with[1][0] the another part:")
+#            _LOGGER.debug(the_another_part)
+#            _LOGGER.debug("another dict:")
+#            _LOGGER.debug(another_dict)
+#            _LOGGER.debug("end of the_another_part")
         
         if as_dict is not None:
             for s in self.ctl_subscribers:
