@@ -959,16 +959,16 @@ class EcoVacsXMPP(ClientXMPP):
                 _LOGGER.debug("handle_ctl called with get_payload()[0][0][0], the other part:")
                 _LOGGER.debug(other_part)
                 other_dict = self._ctl_to_dict(other_part)
-                _LOGGER.debug("other dict in query:")
-                _LOGGER.debug(other_dict)
+                #_LOGGER.debug("other dict in query:")
+                #_LOGGER.debug(other_dict)
             except IndexError:
                 _LOGGER.warning("No extra payload")
 
     def _ctl_to_dict(self, xml):
         result = xml.attrib.copy()
-#        _LOGGER.debug("result from xml is :")
-#        _LOGGER.debug(result)
-#        _LOGGER.debug("end of result")
+        _LOGGER.debug("result from xml is :")
+        _LOGGER.debug(result)
+        _LOGGER.debug("end of result")
         
         if 'td' in result:
             
