@@ -971,9 +971,10 @@ class EcoVacsXMPP(ClientXMPP):
                 s(as_dict)
         
         if as_dict is None:
-            other_part = message.get_payload()
-            _LOGGER.debug("handle_ctl called with get_payload(), the other part:")
-            _LOGGER.debug(other_part)
+            try:
+                other_part = message.get_payload()[1][0]
+                _LOGGER.debug("handle_ctl called with get_payload()[1][0], the other part:")
+                _LOGGER.debug(other_part)
 
     def _ctl_to_dict(self, xml):
         result = xml.attrib.copy()
