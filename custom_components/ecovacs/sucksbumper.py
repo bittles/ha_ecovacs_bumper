@@ -986,7 +986,11 @@ class EcoVacsXMPP(ClientXMPP):
         result = xml.attrib.copy()
         if other_xml is not None:
             other_result = other_xml.attrib.copy()
+            _LOGGER.debug("other result:")
+            _LOGGER.debug(other_result)
         if 'td' not in result:
+            _LOGGER.debug("td not in result:")
+            _LOGGER.debug(result)
             # This happens for commands with no response data, such as PlaySound
             # Handle response data with no 'td'
 
@@ -1000,6 +1004,8 @@ class EcoVacsXMPP(ClientXMPP):
 
             else:
                 if other_xml is not None: # case where there is child element
+                    _LOGGER.debug("other xml is not none, [0] attrib is")
+                    _LOGGER.debug(other_result[0].attrib)
                     if 'clean' in other_result:
                         _LOGGER.debug("clean detected in other_result, result before event handling:")
                         _LOGGER.debug(result)
@@ -1022,6 +1028,8 @@ class EcoVacsXMPP(ClientXMPP):
                         _LOGGER.debug("result after event battery handling:")
                         _LOGGER.debug(result)
                     else:
+                        _LOGGER.warning("other payload detected but didn't catch on any checks, result is: ")
+                        _LOGGER.debug(result)
                         return
                     result.update(xml[0].attrib)
                     _LOGGER.debug("result after xml update attrib:")
