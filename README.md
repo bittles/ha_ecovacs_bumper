@@ -1,5 +1,5 @@
 # Home Assistant Ecovacs Custom Component with Bumper Support
-Replaces built in ecovacs component.
+Replaces built in ecovacs component.  Commit history is a bit of a mess.  master branch shows changes from bmartins fork of sucks to v1.3.0 of this custom component.  dev branch shows commits from my attempts at testing and getting this to work.
 
 Works with bumper with my N79 and should work with at least other XMPP based ecovacs.  Don't know if changes will work with MQTT based ones.
 
