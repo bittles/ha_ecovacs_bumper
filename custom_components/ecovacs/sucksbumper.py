@@ -958,6 +958,9 @@ class EcoVacsXMPP(ClientXMPP):
                 other_part = message.get_payload()[0][0][0]
                 _LOGGER.debug("handle_ctl called with get_payload()[0][0][0], the other part:")
                 _LOGGER.debug(other_part)
+                other_dict = self._ctl_to_dict(other_part)
+                _LOGGER.debug("other dict in query:")
+                _LOGGER.debug(other_dict)
             except IndexError:
                 _LOGGER.warning("No extra payload")
 
