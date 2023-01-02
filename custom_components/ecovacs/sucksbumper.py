@@ -953,14 +953,14 @@ class EcoVacsXMPP(ClientXMPP):
         the_good_part = message.get_payload()[0][0]
         _LOGGER.debug("the_good_part in handle_ctl is :")
         _LOGGER.debug(the_good_part)
-        the_other_part = None
-        try:
-            the_other_part = message.get_payload()[0][0][0]
-            _LOGGER.debug("Other payload found:")
-            _LOGGER.debug(the_other_part)
-        except IndexError:
-            _LOGGER.debug("No extra payload")
-        as_dict = self._ctl_to_dict(the_good_part, the_other_part)
+ #       the_other_part = None
+ #       try:
+ #           the_other_part = message.get_payload()[0][0][0]
+ #           _LOGGER.debug("Other payload found:")
+ #           _LOGGER.debug(the_other_part)
+ #       except IndexError:
+ #           _LOGGER.debug("No extra payload")
+        as_dict = self._ctl_to_dict(the_good_part)
         _LOGGER.debug("handle ctl called with as_dict:")
         _LOGGER.debug(as_dict)
         if as_dict is not None:
@@ -981,16 +981,16 @@ class EcoVacsXMPP(ClientXMPP):
 #            except IndexError:
 #                _LOGGER.debug("No extra payload")
 
-    def _ctl_to_dict(self, xml, other_xml):
+    def _ctl_to_dict(self, xml):
         #Including changes from jasonarends @ 28da7c2 below
         result = xml.attrib.copy()
         _LOGGER.debug("result is:")
         _LOGGER.debug(result)
-        if other_xml is not None:
-            other_result = other_xml.attrib.copy()
-            _LOGGER.debug("other result:")
-            _LOGGER.debug(other_result)
-            _LOGGER.debug(xml[0])
+ #       if other_xml is not None:
+ #           other_result = other_xml.attrib.copy()
+ #           _LOGGER.debug("other result:")
+ #           _LOGGER.debug(other_result)
+ #           _LOGGER.debug(xml[0].tag)
         if 'td' not in result:
             _LOGGER.debug("td not in result:")
             _LOGGER.debug(result)
@@ -1006,25 +1006,26 @@ class EcoVacsXMPP(ClientXMPP):
                 _LOGGER.debug(result)
 
             else:
-                if other_xml is not None: # case where there is child element
-                    _LOGGER.debug("other xml is not none, [0] attrib is")
-                    _LOGGER.debug(other_result)
-                    if 'clean' in other_result:
-                        _LOGGER.debug("clean detected in other_result, result before event handling:")
+                len(xml) > 0:
+#                if other_xml is not None: # case where there is child element
+                    _LOGGER.debug("child xml detected, [0] tag is")
+                    _LOGGER.debug(xml[0].tag)
+                    if 'clean' in xml[0].tag:
+                        _LOGGER.debug("clean detected in xml[0].tag, result before event handling:")
                         _LOGGER.debug(result)
                         result['event'] = "CleanReport"
 #                        result['event'] = "clean_report"
                         _LOGGER.debug("result after event clean handling:")
                         _LOGGER.debug(result)
-                    elif 'charge' in other_result:
-                        _LOGGER.debug("charge detected in other_result, result before event handling:")
+                    elif 'charge' in xml[0].tag:
+                        _LOGGER.debug("charge detected in xml[0].tag, result before event handling:")
                         _LOGGER.debug(result)
                         result['event'] = "ChargeState"
 #                        result['event'] = "charge_state"
                         _LOGGER.debug("result after event charge handling:")
                         _LOGGER.debug(result)
-                    elif 'battery' in other_result:
-                        _LOGGER.debug("battery detected in other_result, result before event handling:")
+                    elif 'battery' in xml[0].tag:
+                        _LOGGER.debug("battery detected in xml[0].tag, result before event handling:")
                         _LOGGER.debug(result)
                         result['event'] = "BatteryInfo"
 #                        result['event'] = "battery_info"
