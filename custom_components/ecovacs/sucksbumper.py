@@ -910,7 +910,7 @@ class EcoVacsIOTMQ(ClientMQTT):
             if not RepresentsInt(result[key]) and ',' not in result[key]:
                 result[key] = stringcase.snakecase(result[key])
 
-        return result                      
+        return result
        
 
 class EcoVacsXMPP(ClientXMPP):
@@ -946,78 +946,155 @@ class EcoVacsXMPP(ClientXMPP):
         self.ctl_subscribers.append(function)
 
     def _handle_ctl(self, message):
-        the_good_part = message.get_payload()[0][0]
+        the_good_part = str(message.payload.decode("utf-8"))
+#        the_good_part = message.get_payload()[0][0]
+#        other_part = "{'ret': 'ok'}"
+#        try:
+#            other_part = message.get_payload()[0][0][0]
+#            _LOGGER.debug("Other payload found:")
+#            _LOGGER.debug(other_part)
+#        except IndexError:
+#            _LOGGER.debug("No extra payload")
         as_dict = self._ctl_to_dict(the_good_part)
-        
+        _LOGGER.debug("handle ctl called with as_dict:")
+        _LOGGER.debug(as_dict)
         if as_dict is not None:
             for s in self.ctl_subscribers:
                 s(as_dict)
         
-        if as_dict is None:
-            try:
-                other_part = message.get_payload()[0][0][0]
-               # _LOGGER.debug("handle_ctl called with get_payload()[0][0][0], the other part:")
-                #_LOGGER.debug(other_part)
-                other_dict = self._ctl_to_dict(other_part)
-                #_LOGGER.debug("other dict in query:")
-                #_LOGGER.debug(other_dict)
-                if other_dict is not None:
-                    for s in self.ctl_subscribers:
-                        s(other_dict)
-            except IndexError:
-                _LOGGER.warning("No extra payload")
+#        if as_dict is None:
+#            try:
+#                other_part = message.get_payload()[0][0][0]
+#               # _LOGGER.debug("handle_ctl called with get_payload()[0][0][0], the other part:")
+#                #_LOGGER.debug(other_part)
+#                other_dict = self._ctl_to_dict(other_part)
+#                #_LOGGER.debug("other dict in query:")
+#                #_LOGGER.debug(other_dict)
+#                if other_dict is not None:
+#                    for s in self.ctl_subscribers:
+#                        s(other_dict)
+#            except IndexError:
+#                _LOGGER.debug("No extra payload")
 
     def _ctl_to_dict(self, xml):
+        #Including changes from jasonarends @ 28da7c2 below
         result = xml.attrib.copy()
-        _LOGGER.debug("result from xml is :")
-        _LOGGER.debug(result)
-        _LOGGER.debug("end of result")
-        
-        if 'td' in result:
-            
+        if 'td' not in result:
+            # This happens for commands with no response data, such as PlaySound
+            # Handle response data with no 'td'
+
+            if 'type' in result: # single element with type and val
+                _LOGGER.debug("type detected in result, result before event handling:")
+                _LOGGER.debug(result)
+                result['event'] = "life_span" # seems to always be LifeSpan type
+                _LOGGER.debug("result after event life_span handling:")
+                _LOGGER.debug(result)
+
+            else:
+                if len(xml) > 0: # case where there is child element
+                    if 'clean' in xml[0].tag:
+                        _LOGGER.debug("clean detected in result, result before event handling:")
+                        _LOGGER.debug(result)
+                        result['event'] = "clean_report"
+                        _LOGGER.debug("result after event clean handling:")
+                        _LOGGER.debug(result)
+                    elif 'charge' in xml[0].tag:
+                        _LOGGER.debug("charge detected in result, result before event handling:")
+                        _LOGGER.debug(result)
+                        result['event'] = "charge_state"
+                        _LOGGER.debug("result after event charge handling:")
+                        _LOGGER.debug(result)
+                    elif 'battery' in xml[0].tag:
+                        _LOGGER.debug("battery detected in result, result before event handling:")
+                        _LOGGER.debug(result)
+                        result['event'] = "battery_info"
+                        _LOGGER.debug("result after event battery handling:")
+                        _LOGGER.debug(result)
+                    else:
+                        return
+                    result.update(xml[0].attrib)
+                    _LOGGER.debug("result after xml update attrib:")
+                    _LOGGER.debug(result)
+                else: # for non-'type' result with no child element, e.g., result of PlaySound
+                    return
+        else: # response includes 'td'
+            _LOGGER.debug("td detected in result, result before event handling:")
+            _LOGGER.debug(result)
             result['event'] = result.pop('td')
+            _LOGGER.debug("result after event td handling:")
+            _LOGGER.debug(result)
             if xml:
                 result.update(xml[0].attrib)
+                _LOGGER.debug("IF XML sub-check result after xml update attrib:")
+                _LOGGER.debug(result)
+   
+        for key in result:
+            #Check for RepresentInt to handle negative int values, and ',' for ignoring position updates
+            if not RepresentsInt(result[key]) and ',' not in result[key]:
+                result[key] = stringcase.snakecase(result[key])
 
-            for key in result:
-                if not RepresentsInt(result[key]): #Fix to handle negative int values
-                    result[key] = stringcase.snakecase(result[key])
-            
+        return result
+#
+#        result = xml.attrib.copy()
+#        other_result = other_xml.attrib.copy()
+#        _LOGGER.debug("result from xml is :")
+#        _LOGGER.debug(result)
+#        _LOGGER.debug("end of result")
+#        _LOGGER.debug("other_result from xml is :")
+#        _LOGGER.debug(other_result)
+#        _LOGGER.debug("end of other_result")
+#        if 'td' in result:
+#            result['event'] = result.pop('td')
+#            if xml:
+#                result.update(xml[0].attrib)
+
+#            for key in result:
+#                if not RepresentsInt(result[key]): #Fix to handle negative int values
+#                    result[key] = stringcase.snakecase(result[key])
 #            _LOGGER.debug("td detected in result and result is:")
 #            _LOGGER.debug(result)
 #            _LOGGER.debug("end of td detect result")
-            
-            return result
+#            return result
 
-        elif 'type' in result:
+#        elif 'type' in result:
 #            result['event'] = result.pop('type')
-            if 'errno' in result:
-                if result['errno'] == '':
-                    result['errno'] = 'life_span'
-                    result['event'] = result.pop('errno')
-                    if xml:
-                        result.update(xml[0].attrib)
-            else:
-                result['event'] = result.pop('type')
-                if xml:
-                    result.update(xml[0].attrib)
+#            if 'errno' in result:
+#                if result['errno'] == '':
+#                    result['errno'] = 'life_span'
+#                    result['event'] = result.pop('errno')
+#                    if xml:
+#                        result.update(xml[0].attrib)
+#            else:
+#                result['event'] = result.pop('type')
+#                if xml:
+#                    result.update(xml[0].attrib)
 
-            for key in result:
-                if not RepresentsInt(result[key]): #Fix to handle negative int values
-                    result[key] = stringcase.snakecase(result[key])
-
+#            for key in result:
+#               if not RepresentsInt(result[key]): #Fix to handle negative int values
+#                   result[key] = stringcase.snakecase(result[key])
 #                    _LOGGER.debug("type detected in result and result is:")
 #                    _LOGGER.debug(result)
 #                    _LOGGER.debug("end of type detect result")
+#            return result
 
-            return result
+#        elif 'type' in other_result:
+#            if len(xmlchild) > 0:
+#                result = xmlchild[0].attrib.copy()
+#                #Fix for difference in XMPP vs API response
+#                #Depending on the report will use the tag and add "report" to fit the mold of sucks library
+#                if xmlchild[0].tag == "clean":
+#                    result['event'] = "CleanReport"
+#                elif xmlchild[0].tag == "charge":
+#                    result['event'] = "ChargeState"
+#                elif xmlchild[0].tag == "battery":
+#                    result['event'] = "BatteryInfo"
 
-        else:
-            # This happens for commands with no response data, such as PlaySound
-            _LOGGER.debug("neither type nor td in result:")
-            _LOGGER.debug(result)
-            _LOGGER.debug("end of no td or type detect result")
-            return
+#        else:
+#            # This happens for commands with no response data, such as PlaySound
+#            _LOGGER.debug("neither type nor td in result:")
+#            _LOGGER.debug(result)
+#            _LOGGER.debug("end of no td or type detect result")
+#            return
 
     def register_callback(self, userdata, message):
 
