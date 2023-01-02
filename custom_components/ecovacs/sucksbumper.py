@@ -972,8 +972,8 @@ class EcoVacsXMPP(ClientXMPP):
         
         if as_dict is None:
             try:
-                other_part = message.get_payload()[1][0]
-                _LOGGER.debug("handle_ctl called with get_payload()[1][0], the other part:")
+                other_part = message.get_payload()[0][1]
+                _LOGGER.debug("handle_ctl called with get_payload()[0][1], the other part:")
                 _LOGGER.debug(other_part)
             except TypeError:
                 _LOGGER.warning("No extra payload")
