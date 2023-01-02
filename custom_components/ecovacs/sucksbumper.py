@@ -987,7 +987,7 @@ class EcoVacsXMPP(ClientXMPP):
         _LOGGER.debug("result is:")
         _LOGGER.debug(result)
         if other_xml is not None:
-            other_result = other_xml.copy()
+            other_result = other_xml.attrib.copy()
             _LOGGER.debug("other result:")
             _LOGGER.debug(other_result)
             _LOGGER.debug(xml[0])
