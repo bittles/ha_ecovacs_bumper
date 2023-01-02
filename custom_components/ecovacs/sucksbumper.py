@@ -976,7 +976,7 @@ class EcoVacsXMPP(ClientXMPP):
                 _LOGGER.debug("handle_ctl called with get_payload()[1][0], the other part:")
                 _LOGGER.debug(other_part)
             except TypeError:
-            _LOGGER.warning("No extra payload")
+                _LOGGER.warning("No extra payload")
 
     def _ctl_to_dict(self, xml):
         result = xml.attrib.copy()
