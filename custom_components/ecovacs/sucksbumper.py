@@ -946,13 +946,13 @@ class EcoVacsXMPP(ClientXMPP):
         self.ctl_subscribers.append(function)
 
     def _handle_ctl(self, message):
-        _LOGGER.debug("message in handle_ctl is:")
-        _LOGGER.debug(message)
+#        _LOGGER.debug("message in handle_ctl is:")
+#        _LOGGER.debug(message)
 #        the_good_part = str(message.payload.decode("utf-8"))
 #        the_good_part = message.get_payload()[0][0]
         the_good_part = message.get_payload()[0][0]
-        _LOGGER.debug("the_good_part in handle_ctl is :")
-        _LOGGER.debug(the_good_part)
+#        _LOGGER.debug("the_good_part in handle_ctl is :")
+#        _LOGGER.debug(the_good_part)
  #       the_other_part = None
  #       try:
  #           the_other_part = message.get_payload()[0][0][0]
@@ -961,8 +961,8 @@ class EcoVacsXMPP(ClientXMPP):
  #       except IndexError:
  #           _LOGGER.debug("No extra payload")
         as_dict = self._ctl_to_dict(the_good_part)
-        _LOGGER.debug("handle ctl called with as_dict:")
-        _LOGGER.debug(as_dict)
+#        _LOGGER.debug("handle ctl called with as_dict:")
+#        _LOGGER.debug(as_dict)
         if as_dict is not None:
             for s in self.ctl_subscribers:
                 s(as_dict)
@@ -984,74 +984,74 @@ class EcoVacsXMPP(ClientXMPP):
     def _ctl_to_dict(self, xml):
         #Including changes from jasonarends @ 28da7c2 below
         result = xml.attrib.copy()
-        _LOGGER.debug("result is:")
-        _LOGGER.debug(result)
+#        _LOGGER.debug("result is:")
+#        _LOGGER.debug(result)
  #       if other_xml is not None:
  #           other_result = other_xml.attrib.copy()
  #           _LOGGER.debug("other result:")
  #           _LOGGER.debug(other_result)
  #           _LOGGER.debug(xml[0].tag)
         if 'td' not in result:
-            _LOGGER.debug("td not in result:")
-            _LOGGER.debug(result)
+#            _LOGGER.debug("td not in result:")
+#            _LOGGER.debug(result)
             # This happens for commands with no response data, such as PlaySound
             # Handle response data with no 'td'
 
             if 'type' in result: # single element with type and val
-                _LOGGER.debug("type detected in result, result before event handling:")
-                _LOGGER.debug(result)
+#                _LOGGER.debug("type detected in result, result before event handling:")
+#                _LOGGER.debug(result)
                 result['event'] = "LifeSpan" # seems to always be LifeSpan type
 #                result['event'] = "life_span" # seems to always be LifeSpan type
-                _LOGGER.debug("result after event LifeSpan handling:")
-                _LOGGER.debug(result)
+#                _LOGGER.debug("result after event LifeSpan handling:")
+#                _LOGGER.debug(result)
 
             else:
                 if xml[0] is not None:
 #                if other_xml is not None: # case where there is child element
-                    _LOGGER.debug("child xml detected, [0] tag is")
-                    _LOGGER.debug(xml[0].tag)
+#                    _LOGGER.debug("child xml detected, [0] tag is")
+#                    _LOGGER.debug(xml[0].tag)
                     if 'clean' in xml[0].tag:
-                        _LOGGER.debug("clean detected in xml[0].tag, result before event handling:")
-                        _LOGGER.debug(result)
+#                        _LOGGER.debug("clean detected in xml[0].tag, result before event handling:")
+#                        _LOGGER.debug(result)
                         result['event'] = "CleanReport"
 #                        result['event'] = "clean_report"
-                        _LOGGER.debug("result after event clean handling:")
-                        _LOGGER.debug(result)
+#                        _LOGGER.debug("result after event clean handling:")
+#                        _LOGGER.debug(result)
                     elif 'charge' in xml[0].tag:
-                        _LOGGER.debug("charge detected in xml[0].tag, result before event handling:")
-                        _LOGGER.debug(result)
+#                        _LOGGER.debug("charge detected in xml[0].tag, result before event handling:")
+#                        _LOGGER.debug(result)
                         result['event'] = "ChargeState"
 #                        result['event'] = "charge_state"
-                        _LOGGER.debug("result after event charge handling:")
-                        _LOGGER.debug(result)
+#                        _LOGGER.debug("result after event charge handling:")
+#                        _LOGGER.debug(result)
                     elif 'battery' in xml[0].tag:
-                        _LOGGER.debug("battery detected in xml[0].tag, result before event handling:")
-                        _LOGGER.debug(result)
+#                        _LOGGER.debug("battery detected in xml[0].tag, result before event handling:")
+#                        _LOGGER.debug(result)
                         result['event'] = "BatteryInfo"
 #                        result['event'] = "battery_info"
-                        _LOGGER.debug("result after event battery handling:")
-                        _LOGGER.debug(result)
+#                        _LOGGER.debug("result after event battery handling:")
+#                        _LOGGER.debug(result)
                     else:
-                        _LOGGER.warning("other payload detected but didn't catch on any checks, result is: ")
-                        _LOGGER.debug(result)
+#                        _LOGGER.warning("other payload detected but didn't catch on any checks, result is: ")
+#                        _LOGGER.debug(result)
                         return
                     result.update(xml[0].attrib)
-                    _LOGGER.debug("result after xml update attrib:")
-                    _LOGGER.debug(result)
+#                    _LOGGER.debug("result after xml update attrib:")
+#                    _LOGGER.debug(result)
                 else: # for non-'type' result with no child element, e.g., result of PlaySound
-                    _LOGGER.warning("payload didn't catch on any checks, result is: ")
-                    _LOGGER.debug(result)
+#                    _LOGGER.warning("payload didn't catch on any checks, result is: ")
+#                    _LOGGER.debug(result)
                     return
         else: # response includes 'td'
-            _LOGGER.debug("td detected in result, result before event handling:")
-            _LOGGER.debug(result)
+#            _LOGGER.debug("td detected in result, result before event handling:")
+#            _LOGGER.debug(result)
             result['event'] = result.pop('td')
-            _LOGGER.debug("result after event td handling:")
-            _LOGGER.debug(result)
+#            _LOGGER.debug("result after event td handling:")
+#            _LOGGER.debug(result)
             if xml:
                 result.update(xml[0].attrib)
-                _LOGGER.debug("IF XML sub-check result after xml update attrib:")
-                _LOGGER.debug(result)
+#                _LOGGER.debug("IF XML sub-check result after xml update attrib:")
+#                _LOGGER.debug(result)
    
         for key in result:
             #Check for RepresentInt to handle negative int values, and ',' for ignoring position updates

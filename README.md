@@ -3,7 +3,9 @@ Replaces built in ecovacs component.
 
 Works with bumper with my N79 and should work with at least other XMPP based ecovacs.  Don't know if changes will work with MQTT based ones.
 
-Added additional catches to sucks because my N79 sends some weird payloads, but attributes all pull in now for brush life spans.  Couple initial queries it also sends weird that I'm in process of catching atm.
+Added additional catches to sucks because my N79 sends some weird payloads, but attributes all pull in now for brush life spans.  Couple initial queries it also sends weird that I'm in process of catching atm.  As of version 1.3.0 (in the manifest.json) these initial queries and all attributes are working.  Was using an implementation completely mine but saw in the MQTT class there were already catches for child payloads without the main payload having the expected td in its payload.  Kept comments in giving credit and adapted them to work with xmpp.
+
+With bumper and my N79 commands would work but some queries had responses that included errno='', which bumper would flag as an error even though the full response was there. If your debug logs are throwing errors and the errno is '' then my small fork of bumper may help https://github.com/bittles/bumper-fork 
 
 Should work as regular if bumper isn't used in config but haven't tested yet, goal was to get it all local.  Maybe mess around and test it in future.
 
