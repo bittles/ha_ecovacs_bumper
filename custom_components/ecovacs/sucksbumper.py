@@ -998,15 +998,15 @@ class EcoVacsXMPP(ClientXMPP):
                     if xml:
                         result.update(xml[0].attrib)
 
-                    for key in result:
-                        if not RepresentsInt(result[key]): #Fix to handle negative int values
-                            result[key] = stringcase.snakecase(result[key])
+            for key in result:
+                if not RepresentsInt(result[key]): #Fix to handle negative int values
+                    result[key] = stringcase.snakecase(result[key])
 
 #                    _LOGGER.debug("type detected in result and result is:")
 #                    _LOGGER.debug(result)
 #                    _LOGGER.debug("end of type detect result")
 
-                    return result
+            return result
 
         else:
             # This happens for commands with no response data, such as PlaySound
