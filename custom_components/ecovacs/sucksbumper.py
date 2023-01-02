@@ -1016,6 +1016,8 @@ class EcoVacsXMPP(ClientXMPP):
                     _LOGGER.debug("result after xml update attrib:")
                     _LOGGER.debug(result)
                 else: # for non-'type' result with no child element, e.g., result of PlaySound
+                    _LOGGER.warning("payload didn't catch on any checks, result is: ")
+                    _LOGGER.debug(result)
                     return
         else: # response includes 'td'
             _LOGGER.debug("td detected in result, result before event handling:")
