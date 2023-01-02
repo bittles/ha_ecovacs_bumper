@@ -997,6 +997,10 @@ class EcoVacsXMPP(ClientXMPP):
                     result['event'] = result.pop('errno')
                     if xml:
                         result.update(xml[0].attrib)
+            else:
+                result['event'] = result.pop('type')
+                if xml:
+                    result.update(xml[0].attrib)
 
             for key in result:
                 if not RepresentsInt(result[key]): #Fix to handle negative int values
