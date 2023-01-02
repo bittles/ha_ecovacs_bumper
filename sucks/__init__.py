@@ -83,9 +83,10 @@ CLEAN_MODE_FROM_ECOVACS = {
     'border': CLEAN_MODE_EDGE,
     'spot': CLEAN_MODE_SPOT,
     'spot_area': CLEAN_MODE_SPOT_AREA,
+    'SpotArea': CLEAN_MODE_SPOT_AREA,
     'singleroom': CLEAN_MODE_SINGLE_ROOM,
     'stop': CLEAN_MODE_STOP,
-    'going': CHARGE_MODE_RETURNING
+    'going': CHARGE_MODE_RETURNING,
 }
 
 FAN_SPEED_TO_ECOVACS = {
@@ -95,32 +96,38 @@ FAN_SPEED_TO_ECOVACS = {
 
 FAN_SPEED_FROM_ECOVACS = {
     'standard': FAN_SPEED_NORMAL,
-    'strong': FAN_SPEED_HIGH
+    'strong': FAN_SPEED_HIGH,
 }
 
 CHARGE_MODE_TO_ECOVACS = {
     CHARGE_MODE_RETURN: 'go',
     CHARGE_MODE_RETURNING: 'Going',
     CHARGE_MODE_CHARGING: 'SlotCharging',
-    CHARGE_MODE_IDLE: 'Idle'
+    CHARGE_MODE_IDLE: 'Idle',
 }
 
 CHARGE_MODE_FROM_ECOVACS = {
     'going': CHARGE_MODE_RETURNING,
+    'Going': CHARGE_MODE_RETURNING,
     'slot_charging': CHARGE_MODE_CHARGING,
-    'idle': CHARGE_MODE_IDLE
+    'SlotCharging': CHARGE_MODE_CHARGING,
+    'idle': CHARGE_MODE_IDLE,
+    'Idle': CHARGE_MODE_IDLE,
 }
 
 COMPONENT_TO_ECOVACS = {
     COMPONENT_MAIN_BRUSH: 'Brush',
     COMPONENT_SIDE_BRUSH: 'SideBrush',
-    COMPONENT_FILTER: 'DustCaseHeap'
+    COMPONENT_FILTER: 'DustCaseHeap',
 }
 
 COMPONENT_FROM_ECOVACS = {
     'brush': COMPONENT_MAIN_BRUSH,
+    'Brush': COMPONENT_MAIN_BRUSH,
     'side_brush': COMPONENT_SIDE_BRUSH,
-    'dust_case_heap': COMPONENT_FILTER
+    'SideBrush': COMPONENT_SIDE_BRUSH,
+    'dust_case_heap': COMPONENT_FILTER,
+    'DustCaseHeap': COMPONENT_FILTER,
 }
 
 def str_to_bool_or_cert(s):
@@ -376,9 +383,12 @@ class EventListener(object):
         self._emitter.unsubscribe(self)
 
 class VacBot():
-    def __init__(self, user, domain, resource, secret, vacuum, continent, server_address=None, monitor=False, verify_ssl=True):
+    # switched verify and monitor just to be consistent
+    def __init__(self, user, domain, resource, secret, vacuum, continent, server_address=None, verify_ssl=True, monitor=False):
 
         self.vacuum = vacuum
+
+        self.server_address = server_address
 
         # If True, the VacBot object will handle keeping track of all statuses,
         # including the initial request for statuses, and new requests after the
@@ -410,10 +420,18 @@ class VacBot():
         self.iotmq = None
 
         if not vacuum['iotmq']:
-            self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
-            #Uncomment line to allow unencrypted plain auth
-            #self.xmpp['feature_mechanisms'].unencrypted_plain = True
-            self.xmpp.subscribe_to_ctls(self._handle_ctl)            
+            # if server is defined then use bmartins init example for using sucks library in his docs; couldnt get this to work in hass with code he had here though, maybe not referencing everything right in component init
+            if self.server_address is not None:
+                vacuum = {"did": "none", "class": "none"}
+  #              super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
+                self.xmpp = EcoVacsXMPP("sucks", "ecouser.net", "", "", "", vacuum, server_address)
+                self.xmpp.subscribe_to_ctls(self._handle_ctl) 
+            # should work with ecovacs servers but 1) havent tested with my changes and 2) havent tested with bmartins changes
+            else:
+                self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
+                #Uncomment line to allow unencrypted plain auth
+                #self.xmpp['feature_mechanisms'].unencrypted_plain = True
+                self.xmpp.subscribe_to_ctls(self._handle_ctl)            
         
         else:            
             self.iotmq = EcoVacsIOTMQ(user, domain, resource, secret, continent, vacuum, server_address, verify_ssl=verify_ssl)            
@@ -426,24 +444,37 @@ class VacBot():
             #self.xmpp.subscribe_to_ctls(self._handle_ctl)            
 
     def connect_and_wait_until_ready(self):
-        if not self.vacuum['iotmq']:
+        # use bmartins exmaple if defining our own server, couldn't get this to work without defining, probably xmpp port but idk
+        if self.server_address:
+            logging.info("connecting")
+#            self.xmpp.connect(self.server_address)
+#            self.xmpp.process()
             self.xmpp.connect_and_wait_until_ready()
             self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
+        # keep rest of bmartins fork intact
         else:
-            self.iotmq.connect_and_wait_until_ready()
-            self.iotmq.schedule(30, self.send_ping)
-            #self.xmpp.connect_and_wait_until_ready() #Leaving in case xmpp is given to iotmq in the future        
-
-        if self._monitor:
-            # Do a first ping, which will also fetch initial statuses if the ping succeeds
-            self.send_ping()
-            if not self.vacuum['iotmq']:            
-                self.xmpp.schedule('Components', 3600, lambda: self.refresh_components(), repeat=True)
+            if not self.vacuum['iotmq']:
+                self.xmpp.connect_and_wait_until_ready()
+                self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
             else:
-                self.iotmq.schedule(3600,self.refresh_components)
+                self.iotmq.connect_and_wait_until_ready()
+                self.iotmq.schedule(30, self.send_ping)
+                #self.xmpp.connect_and_wait_until_ready() #Leaving in case xmpp is given to iotmq in the future        
+
+            if self._monitor:
+                # Do a first ping, which will also fetch initial statuses if the ping succeeds
+                self.send_ping()
+                if not self.vacuum['iotmq']:            
+                    self.xmpp.schedule('Components', 3600, lambda: self.refresh_components(), repeat=True)
+                else:
+                    self.iotmq.schedule(3600,self.refresh_components)
 
     def _handle_ctl(self, ctl):
+#        _LOGGER.debug("super handle_ctl called with ctl:")
+#        _LOGGER.debug(ctl)
         method = '_handle_' + ctl['event']
+#        _LOGGER.debug("method assigned:")
+#        _LOGGER.debug(method)
         if hasattr(self, method):
             getattr(self, method)(ctl)
 
@@ -458,7 +489,17 @@ class VacBot():
             _LOGGER.debug("*** error = " + error)
 
     def _handle_life_span(self, event):
+    
+#        _LOGGER.debug("_handle_life_span called, event is: ")
+#        _LOGGER.debug(event)
+#        _LOGGER.debug("event shown now continue with handle life span")
+        
         type = event['type']
+        
+#        _LOGGER.debug("type in handle life span: ")
+#        _LOGGER.debug(type)
+#        _LOGGER.debug("type shown now continue with handle life span")
+        
         try:
             type = COMPONENT_FROM_ECOVACS[type]
         except KeyError:
@@ -466,6 +507,7 @@ class VacBot():
 
         if 'val' in event:
             lifespan = int(event['val']) / 100
+            _LOGGER.debug("**********Component " + type + " has lifespan of " + str(lifespan) + ".")
         else:
             lifespan = int(event['left']) / 60  #This works for a D901
         self.components[type] = lifespan
@@ -868,7 +910,7 @@ class EcoVacsIOTMQ(ClientMQTT):
             if not RepresentsInt(result[key]) and ',' not in result[key]:
                 result[key] = stringcase.snakecase(result[key])
 
-        return result                      
+        return result
        
 
 class EcoVacsXMPP(ClientXMPP):
@@ -904,27 +946,180 @@ class EcoVacsXMPP(ClientXMPP):
         self.ctl_subscribers.append(function)
 
     def _handle_ctl(self, message):
+#        _LOGGER.debug("message in handle_ctl is:")
+#        _LOGGER.debug(message)
+#        the_good_part = str(message.payload.decode("utf-8"))
+#        the_good_part = message.get_payload()[0][0]
         the_good_part = message.get_payload()[0][0]
+#        _LOGGER.debug("the_good_part in handle_ctl is :")
+#        _LOGGER.debug(the_good_part)
+ #       the_other_part = None
+ #       try:
+ #           the_other_part = message.get_payload()[0][0][0]
+ #           _LOGGER.debug("Other payload found:")
+ #           _LOGGER.debug(the_other_part)
+ #       except IndexError:
+ #           _LOGGER.debug("No extra payload")
         as_dict = self._ctl_to_dict(the_good_part)
+#        _LOGGER.debug("handle ctl called with as_dict:")
+#        _LOGGER.debug(as_dict)
         if as_dict is not None:
             for s in self.ctl_subscribers:
                 s(as_dict)
+        
+#        if as_dict is None:
+#            try:
+#                other_part = message.get_payload()[0][0][0]
+#               # _LOGGER.debug("handle_ctl called with get_payload()[0][0][0], the other part:")
+#                #_LOGGER.debug(other_part)
+#                other_dict = self._ctl_to_dict(other_part)
+#                #_LOGGER.debug("other dict in query:")
+#                #_LOGGER.debug(other_dict)
+#                if other_dict is not None:
+#                    for s in self.ctl_subscribers:
+#                        s(other_dict)
+#            except IndexError:
+#                _LOGGER.debug("No extra payload")
 
     def _ctl_to_dict(self, xml):
+        #Including changes from jasonarends @ 28da7c2 below
         result = xml.attrib.copy()
+#        _LOGGER.debug("result is:")
+#        _LOGGER.debug(result)
+ #       if other_xml is not None:
+ #           other_result = other_xml.attrib.copy()
+ #           _LOGGER.debug("other result:")
+ #           _LOGGER.debug(other_result)
+ #           _LOGGER.debug(xml[0].tag)
         if 'td' not in result:
+#            _LOGGER.debug("td not in result:")
+#            _LOGGER.debug(result)
             # This happens for commands with no response data, such as PlaySound
-            return
+            # Handle response data with no 'td'
 
-        result['event'] = result.pop('td')
-        if xml:
-            result.update(xml[0].attrib)
+            if 'type' in result: # single element with type and val
+#                _LOGGER.debug("type detected in result, result before event handling:")
+#                _LOGGER.debug(result)
+                result['event'] = "LifeSpan" # seems to always be LifeSpan type
+#                result['event'] = "life_span" # seems to always be LifeSpan type
+#                _LOGGER.debug("result after event LifeSpan handling:")
+#                _LOGGER.debug(result)
 
+            else:
+                if xml[0] is not None:
+#                if other_xml is not None: # case where there is child element
+#                    _LOGGER.debug("child xml detected, [0] tag is")
+#                    _LOGGER.debug(xml[0].tag)
+                    if 'clean' in xml[0].tag:
+#                        _LOGGER.debug("clean detected in xml[0].tag, result before event handling:")
+#                        _LOGGER.debug(result)
+                        result['event'] = "CleanReport"
+#                        result['event'] = "clean_report"
+#                        _LOGGER.debug("result after event clean handling:")
+#                        _LOGGER.debug(result)
+                    elif 'charge' in xml[0].tag:
+#                        _LOGGER.debug("charge detected in xml[0].tag, result before event handling:")
+#                        _LOGGER.debug(result)
+                        result['event'] = "ChargeState"
+#                        result['event'] = "charge_state"
+#                        _LOGGER.debug("result after event charge handling:")
+#                        _LOGGER.debug(result)
+                    elif 'battery' in xml[0].tag:
+#                        _LOGGER.debug("battery detected in xml[0].tag, result before event handling:")
+#                        _LOGGER.debug(result)
+                        result['event'] = "BatteryInfo"
+#                        result['event'] = "battery_info"
+#                        _LOGGER.debug("result after event battery handling:")
+#                        _LOGGER.debug(result)
+                    else:
+#                        _LOGGER.warning("other payload detected but didn't catch on any checks, result is: ")
+#                        _LOGGER.debug(result)
+                        return
+                    result.update(xml[0].attrib)
+#                    _LOGGER.debug("result after xml update attrib:")
+#                    _LOGGER.debug(result)
+                else: # for non-'type' result with no child element, e.g., result of PlaySound
+#                    _LOGGER.warning("payload didn't catch on any checks, result is: ")
+#                    _LOGGER.debug(result)
+                    return
+        else: # response includes 'td'
+#            _LOGGER.debug("td detected in result, result before event handling:")
+#            _LOGGER.debug(result)
+            result['event'] = result.pop('td')
+#            _LOGGER.debug("result after event td handling:")
+#            _LOGGER.debug(result)
+            if xml:
+                result.update(xml[0].attrib)
+#                _LOGGER.debug("IF XML sub-check result after xml update attrib:")
+#                _LOGGER.debug(result)
+   
         for key in result:
-            if not RepresentsInt(result[key]): #Fix to handle negative int values
+            #Check for RepresentInt to handle negative int values, and ',' for ignoring position updates
+            if not RepresentsInt(result[key]) and ',' not in result[key]:
                 result[key] = stringcase.snakecase(result[key])
-            
+
         return result
+#
+#        result = xml.attrib.copy()
+#        other_result = other_xml.attrib.copy()
+#        _LOGGER.debug("result from xml is :")
+#        _LOGGER.debug(result)
+#        _LOGGER.debug("end of result")
+#        _LOGGER.debug("other_result from xml is :")
+#        _LOGGER.debug(other_result)
+#        _LOGGER.debug("end of other_result")
+#        if 'td' in result:
+#            result['event'] = result.pop('td')
+#            if xml:
+#                result.update(xml[0].attrib)
+
+#            for key in result:
+#                if not RepresentsInt(result[key]): #Fix to handle negative int values
+#                    result[key] = stringcase.snakecase(result[key])
+#            _LOGGER.debug("td detected in result and result is:")
+#            _LOGGER.debug(result)
+#            _LOGGER.debug("end of td detect result")
+#            return result
+
+#        elif 'type' in result:
+#            result['event'] = result.pop('type')
+#            if 'errno' in result:
+#                if result['errno'] == '':
+#                    result['errno'] = 'life_span'
+#                    result['event'] = result.pop('errno')
+#                    if xml:
+#                        result.update(xml[0].attrib)
+#            else:
+#                result['event'] = result.pop('type')
+#                if xml:
+#                    result.update(xml[0].attrib)
+
+#            for key in result:
+#               if not RepresentsInt(result[key]): #Fix to handle negative int values
+#                   result[key] = stringcase.snakecase(result[key])
+#                    _LOGGER.debug("type detected in result and result is:")
+#                    _LOGGER.debug(result)
+#                    _LOGGER.debug("end of type detect result")
+#            return result
+
+#        elif 'type' in other_result:
+#            if len(xmlchild) > 0:
+#                result = xmlchild[0].attrib.copy()
+#                #Fix for difference in XMPP vs API response
+#                #Depending on the report will use the tag and add "report" to fit the mold of sucks library
+#                if xmlchild[0].tag == "clean":
+#                    result['event'] = "CleanReport"
+#                elif xmlchild[0].tag == "charge":
+#                    result['event'] = "ChargeState"
+#                elif xmlchild[0].tag == "battery":
+#                    result['event'] = "BatteryInfo"
+
+#        else:
+#            # This happens for commands with no response data, such as PlaySound
+#            _LOGGER.debug("neither type nor td in result:")
+#            _LOGGER.debug(result)
+#            _LOGGER.debug("end of no td or type detect result")
+#            return
 
     def register_callback(self, userdata, message):
 
@@ -1088,6 +1283,7 @@ class GetBatteryState(VacBotCommand):
 
 class GetLifeSpan(VacBotCommand):
     def __init__(self, component):
+#        _LOGGER.debug("GetLifeSpan called by VacBot**************")
         super().__init__('GetLifeSpan', {'type': COMPONENT_TO_ECOVACS[component]})
 
 
