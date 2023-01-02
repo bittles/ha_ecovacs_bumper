@@ -956,11 +956,14 @@ class EcoVacsXMPP(ClientXMPP):
         if as_dict is None:
             try:
                 other_part = message.get_payload()[0][0][0]
-                _LOGGER.debug("handle_ctl called with get_payload()[0][0][0], the other part:")
-                _LOGGER.debug(other_part)
+               # _LOGGER.debug("handle_ctl called with get_payload()[0][0][0], the other part:")
+                #_LOGGER.debug(other_part)
                 other_dict = self._ctl_to_dict(other_part)
                 #_LOGGER.debug("other dict in query:")
                 #_LOGGER.debug(other_dict)
+                if other_dict is not None:
+                    for s in self.ctl_subscribers:
+                        s(other_dict)
             except IndexError:
                 _LOGGER.warning("No extra payload")
 
