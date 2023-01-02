@@ -984,10 +984,13 @@ class EcoVacsXMPP(ClientXMPP):
     def _ctl_to_dict(self, xml, other_xml):
         #Including changes from jasonarends @ 28da7c2 below
         result = xml.attrib.copy()
+        _LOGGER.debug("result is:")
+        _LOGGER.debug(result)
         if other_xml is not None:
-            other_result = other_xml.attrib.copy()
+            other_result = other_xml.copy()
             _LOGGER.debug("other result:")
             _LOGGER.debug(other_result)
+            _LOGGER.debug(xml[0])
         if 'td' not in result:
             _LOGGER.debug("td not in result:")
             _LOGGER.debug(result)
@@ -1005,7 +1008,7 @@ class EcoVacsXMPP(ClientXMPP):
             else:
                 if other_xml is not None: # case where there is child element
                     _LOGGER.debug("other xml is not none, [0] attrib is")
-                    _LOGGER.debug(other_result[0].attrib)
+                    _LOGGER.debug(other_result)
                     if 'clean' in other_result:
                         _LOGGER.debug("clean detected in other_result, result before event handling:")
                         _LOGGER.debug(result)
