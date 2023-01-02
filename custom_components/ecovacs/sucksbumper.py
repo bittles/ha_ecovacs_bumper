@@ -950,17 +950,17 @@ class EcoVacsXMPP(ClientXMPP):
         _LOGGER.debug(message)
 #        the_good_part = str(message.payload.decode("utf-8"))
 #        the_good_part = message.get_payload()[0][0]
-        the_good_part = message.get_payload()
+        the_good_part = message.get_payload()[0][0]
         _LOGGER.debug("the_good_part in handle_ctl is :")
-        _LOGGER.debug(message)
-#        other_part = "{'ret': 'ok'}"
-#        try:
-#            other_part = message.get_payload()[0][0][0]
-#            _LOGGER.debug("Other payload found:")
-#            _LOGGER.debug(other_part)
-#        except IndexError:
-#            _LOGGER.debug("No extra payload")
-        as_dict = self._ctl_to_dict(the_good_part)
+        _LOGGER.debug(the_good_part)
+        the_other_part = None
+        try:
+            the_other_part = message.get_payload()[0][0][0]
+            _LOGGER.debug("Other payload found:")
+            _LOGGER.debug(the_other_part)
+        except IndexError:
+            _LOGGER.debug("No extra payload")
+        as_dict = self._ctl_to_dict(the_good_part, the_other_part)
         _LOGGER.debug("handle ctl called with as_dict:")
         _LOGGER.debug(as_dict)
         if as_dict is not None:
@@ -981,9 +981,10 @@ class EcoVacsXMPP(ClientXMPP):
 #            except IndexError:
 #                _LOGGER.debug("No extra payload")
 
-    def _ctl_to_dict(self, xml):
+    def _ctl_to_dict(self, xml, other_xml):
         #Including changes from jasonarends @ 28da7c2 below
         result = xml.attrib.copy()
+        other_result = other_xml.attrib.copy()
         if 'td' not in result:
             # This happens for commands with no response data, such as PlaySound
             # Handle response data with no 'td'
@@ -991,28 +992,32 @@ class EcoVacsXMPP(ClientXMPP):
             if 'type' in result: # single element with type and val
                 _LOGGER.debug("type detected in result, result before event handling:")
                 _LOGGER.debug(result)
-                result['event'] = "life_span" # seems to always be LifeSpan type
-                _LOGGER.debug("result after event life_span handling:")
+                result['event'] = "LifeSpan" # seems to always be LifeSpan type
+#                result['event'] = "life_span" # seems to always be LifeSpan type
+                _LOGGER.debug("result after event LifeSpan handling:")
                 _LOGGER.debug(result)
 
             else:
-                if len(xml) > 0: # case where there is child element
-                    if 'clean' in xml[0].tag:
-                        _LOGGER.debug("clean detected in result, result before event handling:")
+                if other_xml is not None: # case where there is child element
+                    if 'clean' in other_result:
+                        _LOGGER.debug("clean detected in other_result, result before event handling:")
                         _LOGGER.debug(result)
-                        result['event'] = "clean_report"
+                        result['event'] = "CleanReport"
+#                        result['event'] = "clean_report"
                         _LOGGER.debug("result after event clean handling:")
                         _LOGGER.debug(result)
-                    elif 'charge' in xml[0].tag:
-                        _LOGGER.debug("charge detected in result, result before event handling:")
+                    elif 'charge' in other_result:
+                        _LOGGER.debug("charge detected in other_result, result before event handling:")
                         _LOGGER.debug(result)
-                        result['event'] = "charge_state"
+                        result['event'] = "ChargeState"
+#                        result['event'] = "charge_state"
                         _LOGGER.debug("result after event charge handling:")
                         _LOGGER.debug(result)
-                    elif 'battery' in xml[0].tag:
-                        _LOGGER.debug("battery detected in result, result before event handling:")
+                    elif 'battery' in other_result:
+                        _LOGGER.debug("battery detected in other_result, result before event handling:")
                         _LOGGER.debug(result)
-                        result['event'] = "battery_info"
+                        result['event'] = "BatteryInfo"
+#                        result['event'] = "battery_info"
                         _LOGGER.debug("result after event battery handling:")
                         _LOGGER.debug(result)
                     else:
