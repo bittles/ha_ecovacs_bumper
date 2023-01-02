@@ -1006,7 +1006,7 @@ class EcoVacsXMPP(ClientXMPP):
                 _LOGGER.debug(result)
 
             else:
-                len(xml) > 0:
+                xml[0] is not None:
 #                if other_xml is not None: # case where there is child element
                     _LOGGER.debug("child xml detected, [0] tag is")
                     _LOGGER.debug(xml[0].tag)
