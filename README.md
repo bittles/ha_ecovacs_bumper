@@ -3,6 +3,8 @@ Replaces built in ecovacs component.
 
 Works with bumper with my N79 and should work with at least other XMPP based ecovacs.  Don't know if changes will work with MQTT based ones.
 
+Added additional catches to sucks because my N79 sends some weird payloads, but attributes all pull in now for brush life spans.  Couple initial queries it also sends weird that I'm in process of catching atm.
+
 Should work as regular if bumper isn't used in config but haven't tested yet, goal was to get it all local.  Maybe mess around and test it in future.
 
 I'm using the docker-compose example for bumper by bmartin5692, https://github.com/bmartin5692/bumper on an odroid-n2+.
