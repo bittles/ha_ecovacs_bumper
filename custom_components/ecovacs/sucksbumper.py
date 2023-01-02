@@ -946,8 +946,13 @@ class EcoVacsXMPP(ClientXMPP):
         self.ctl_subscribers.append(function)
 
     def _handle_ctl(self, message):
-        the_good_part = str(message.payload.decode("utf-8"))
+        _LOGGER.debug("message in handle_ctl is :")
+        _LOGGER.debug(message)
+#        the_good_part = str(message.payload.decode("utf-8"))
 #        the_good_part = message.get_payload()[0][0]
+        the_good_part = str(message.get_payload().decode("utf-8"))
+        _LOGGER.debug("the_good_part in handle_ctl is :")
+        _LOGGER.debug(message)
 #        other_part = "{'ret': 'ok'}"
 #        try:
 #            other_part = message.get_payload()[0][0][0]
