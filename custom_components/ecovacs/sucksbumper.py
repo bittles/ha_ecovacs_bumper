@@ -946,7 +946,7 @@ class EcoVacsXMPP(ClientXMPP):
         self.ctl_subscribers.append(function)
 
     def _handle_ctl(self, message):
-        _LOGGER.debug("message in handle_ctl is :")
+        _LOGGER.debug("message in handle_ctl is:")
         _LOGGER.debug(message)
 #        the_good_part = str(message.payload.decode("utf-8"))
 #        the_good_part = message.get_payload()[0][0]
@@ -984,7 +984,8 @@ class EcoVacsXMPP(ClientXMPP):
     def _ctl_to_dict(self, xml, other_xml):
         #Including changes from jasonarends @ 28da7c2 below
         result = xml.attrib.copy()
-        other_result = other_xml.attrib.copy()
+        if other_xml is not None:
+            other_result = other_xml.attrib.copy()
         if 'td' not in result:
             # This happens for commands with no response data, such as PlaySound
             # Handle response data with no 'td'
