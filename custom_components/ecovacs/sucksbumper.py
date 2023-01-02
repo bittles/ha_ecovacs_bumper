@@ -950,7 +950,7 @@ class EcoVacsXMPP(ClientXMPP):
         _LOGGER.debug(message)
 #        the_good_part = str(message.payload.decode("utf-8"))
 #        the_good_part = message.get_payload()[0][0]
-        the_good_part = str(message.get_payload().decode("utf-8"))
+        the_good_part = str(message.get_payload())
         _LOGGER.debug("the_good_part in handle_ctl is :")
         _LOGGER.debug(message)
 #        other_part = "{'ret': 'ok'}"
@@ -981,8 +981,9 @@ class EcoVacsXMPP(ClientXMPP):
 #            except IndexError:
 #                _LOGGER.debug("No extra payload")
 
-    def _ctl_to_dict(self, xml):
+    def _ctl_to_dict(self, xmlstring):
         #Including changes from jasonarends @ 28da7c2 below
+        xml = ET.fromstring(xmlstring)
         result = xml.attrib.copy()
         if 'td' not in result:
             # This happens for commands with no response data, such as PlaySound
