@@ -420,33 +420,33 @@ class VacBot():
         self.iotmq = None
 
         if not vacuum['iotmq']:
-            _LOGGER.info("connecting to xmpp******************")
+ #           _LOGGER.info("connecting to xmpp******************")
             # if server is defined then use bmartins init example for using sucks library in his docs; couldnt get this to work in hass with code he had here though, maybe not referencing everything right in component init
-            if self.server_address is not None:
-                _LOGGER.info("connecting to bumper xmpp******************")
-                vacuum = {"did": "none", "class": "none"}
-  #              super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
-                self.xmpp = EcoVacsXMPP("sucks", "ecouser.net", "", "", "", vacuum, server_address)
-                self.xmpp.subscribe_to_ctls(self._handle_ctl) 
-            # should work with ecovacs servers but 1) havent tested with my changes and 2) havent tested with bmartins changes
-            else:
-                _LOGGER.info("connecting to NOT bumper xmpp******************")
-                self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
-                #Uncomment line to allow unencrypted plain auth
-                #self.xmpp['feature_mechanisms'].unencrypted_plain = True
-                self.xmpp.subscribe_to_ctls(self._handle_ctl)            
+            #if self.server_address is not None:
+            #    _LOGGER.info("connecting to bumper xmpp******************")
+            #    vacuum = {"did": "none", "class": "none"}
+  #         #     super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
+            #    self.xmpp = EcoVacsXMPP("sucks", "ecouser.net", "", "", "", vacuum, server_address)
+            #    self.xmpp.subscribe_to_ctls(self._handle_ctl) 
+            ## should work with ecovacs servers but 1) havent tested with my changes and 2) havent tested with bmartins changes
+            #else:
+#            _LOGGER.info("connecting to NOT bumper xmpp******************")
+            self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
+            #Uncomment line to allow unencrypted plain auth
+            #self.xmpp['feature_mechanisms'].unencrypted_plain = True
+            self.xmpp.subscribe_to_ctls(self._handle_ctl)            
         
         else:            
-            _LOGGER.info("connecting to mqtt******************")
-            if self.server_address is not None:
-                _LOGGER.info("connecting to bumper mqtt******************")
-                vacuum = {"did": "none", "class": "none"}
-                self.iotmq = EcoVacsIOTMQ("sucks", "ecouser.net", "", "", "", vacuum, server_address, verify_ssl=verify_ssl)
-                self.iotmq.subscribe_to_ctls(self._handle_ctl)
-            else:
-                _LOGGER.info("connecting to NOT bumper mqtt******************")
-                self.iotmq = EcoVacsIOTMQ(user, domain, resource, secret, continent, vacuum, server_address, verify_ssl=verify_ssl)            
-                self.iotmq.subscribe_to_ctls(self._handle_ctl)
+#            _LOGGER.info("connecting to mqtt******************")
+            #if self.server_address is not None:
+            #    _LOGGER.info("connecting to bumper mqtt******************")
+            #    vacuum = {"did": "none", "class": "none"}
+            #    self.iotmq = EcoVacsIOTMQ("sucks", "ecouser.net", "", "", "", vacuum, server_address, verify_ssl=verify_ssl)
+            #    self.iotmq.subscribe_to_ctls(self._handle_ctl)
+            #else:
+#            _LOGGER.info("connecting to NOT bumper mqtt******************")
+            self.iotmq = EcoVacsIOTMQ(user, domain, resource, secret, continent, vacuum, server_address, verify_ssl=verify_ssl)            
+            self.iotmq.subscribe_to_ctls(self._handle_ctl)
             #The app still connects to XMPP as well, but only issues ping commands.
             #Everything works without XMPP, so leaving the below commented out.
             #self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
