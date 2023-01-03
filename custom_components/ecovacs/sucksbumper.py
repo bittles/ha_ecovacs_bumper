@@ -420,25 +420,31 @@ class VacBot():
         self.iotmq = None
 
         if not vacuum['iotmq']:
+            _LOGGER.info("connecting to xmpp******************")
             # if server is defined then use bmartins init example for using sucks library in his docs; couldnt get this to work in hass with code he had here though, maybe not referencing everything right in component init
             if self.server_address is not None:
+                _LOGGER.info("connecting to bumper xmpp******************")
                 vacuum = {"did": "none", "class": "none"}
   #              super().__init__("sucks", "ecouser.net", "", "", vacuum, "")
                 self.xmpp = EcoVacsXMPP("sucks", "ecouser.net", "", "", "", vacuum, server_address)
                 self.xmpp.subscribe_to_ctls(self._handle_ctl) 
             # should work with ecovacs servers but 1) havent tested with my changes and 2) havent tested with bmartins changes
             else:
+                _LOGGER.info("connecting to NOT bumper xmpp******************")
                 self.xmpp = EcoVacsXMPP(user, domain, resource, secret, continent, vacuum, server_address)
                 #Uncomment line to allow unencrypted plain auth
                 #self.xmpp['feature_mechanisms'].unencrypted_plain = True
                 self.xmpp.subscribe_to_ctls(self._handle_ctl)            
         
         else:            
+            _LOGGER.info("connecting to mqtt******************")
             if self.server_address is not None:
+                _LOGGER.info("connecting to bumper mqtt******************")
                 vacuum = {"did": "none", "class": "none"}
                 self.iotmq = EcoVacsIOTMQ("sucks", "ecouser.net", "", "", "", vacuum, server_address, verify_ssl=verify_ssl)
                 self.iotmq.subscribe_to_ctls(self._handle_ctl)
             else:
+                _LOGGER.info("connecting to NOT bumper mqtt******************")
                 self.iotmq = EcoVacsIOTMQ(user, domain, resource, secret, continent, vacuum, server_address, verify_ssl=verify_ssl)            
                 self.iotmq.subscribe_to_ctls(self._handle_ctl)
             #The app still connects to XMPP as well, but only issues ping commands.
@@ -450,38 +456,38 @@ class VacBot():
 
     def connect_and_wait_until_ready(self):
         # use bmartins exmaple if defining our own server, couldn't get this to work without defining, probably xmpp port but idk
-        if self.server_address:
-            _LOGGER.info("connecting to bumper ******************")
-#            self.xmpp.connect(self.server_address)
-#            self.xmpp.process()
-            if not self.vacuum['iotmq']:
-                _LOGGER.info("connecting to xmpp server for bumper ******************")
-                self.xmpp.connect_and_wait_until_ready()
-                self.xmpp.schedule('Ping', 300, lambda: self.send_ping(), repeat=True)
-            else:
-                _LOGGER.info("connecting to mqtt server for bumper ******************")
-                self.iotmq.connect_and_wait_until_ready()
-                self.iotmq.schedule(30, self.send_ping)
-        # keep rest of bmartins fork intact
+#        if self.server_address:
+#            _LOGGER.info("connecting to bumper ******************")
+##            self.xmpp.connect(self.server_address)
+##            self.xmpp.process()
+#            if not self.vacuum['iotmq']:
+#                _LOGGER.info("connecting to xmpp server for bumper ******************")
+#                self.xmpp.connect_and_wait_until_ready()
+#                self.xmpp.schedule('Ping', 300, lambda: self.send_ping(), repeat=True)
+#            else:
+#                _LOGGER.info("connecting to mqtt server for bumper ******************")
+#                self.iotmq.connect_and_wait_until_ready()
+#                self.iotmq.schedule(30, self.send_ping)
+#        # keep rest of bmartins fork intact
+#        else:
+#        _LOGGER.info("connecting to NOT bumper ******************")
+        if not self.vacuum['iotmq']:
+#            _LOGGER.info("connecting to NOT bumper, xmpp server ******************")
+            self.xmpp.connect_and_wait_until_ready()
+            self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
         else:
-            _LOGGER.info("connecting to NOT bumper ******************")
-            if not self.vacuum['iotmq']:
-                _LOGGER.info("connecting to NOT bumper, xmpp server ******************")
-                self.xmpp.connect_and_wait_until_ready()
-                self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
-            else:
-                _LOGGER.info("connecting to NOT bumper, mqtt server ******************")
-                self.iotmq.connect_and_wait_until_ready()
-                self.iotmq.schedule(30, self.send_ping)
-                #self.xmpp.connect_and_wait_until_ready() #Leaving in case xmpp is given to iotmq in the future        
+#            _LOGGER.info("connecting to NOT bumper, mqtt server ******************")
+            self.iotmq.connect_and_wait_until_ready()
+            self.iotmq.schedule(30, self.send_ping)
+            #self.xmpp.connect_and_wait_until_ready() #Leaving in case xmpp is given to iotmq in the future        
 
-            if self._monitor:
-                # Do a first ping, which will also fetch initial statuses if the ping succeeds
-                self.send_ping()
-                if not self.vacuum['iotmq']:            
-                    self.xmpp.schedule('Components', 3600, lambda: self.refresh_components(), repeat=True)
-                else:
-                    self.iotmq.schedule(3600,self.refresh_components)
+        if self._monitor:
+            # Do a first ping, which will also fetch initial statuses if the ping succeeds
+            self.send_ping()
+            if not self.vacuum['iotmq']:            
+                self.xmpp.schedule('Components', 3600, lambda: self.refresh_components(), repeat=True)
+            else:
+                self.iotmq.schedule(3600,self.refresh_components)
 
     def _handle_ctl(self, ctl):
 #        _LOGGER.debug("super handle_ctl called with ctl:")
