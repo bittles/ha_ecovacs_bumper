@@ -66,6 +66,9 @@ logger:
     custom_components.ecovacs.sucksbumper: debug  # or whatever level you want
 ```
 
+### To-Do:
+Make component async, use config_flow, create device and clean up some of the hass integration stuff.
+
 ### Misc Info From Making This
 Commit history is a bit of a mess.  master branch shows changes from bmartins fork of sucks to v1.3.0 of this custom component.  dev branch shows commits from my attempts at testing and getting this to work.
 
