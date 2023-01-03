@@ -830,7 +830,7 @@ class EcoVacsXMPP(ClientXMPP):
         ClientXMPP.__init__(self, "{}@{}/{}".format(user, domain,resource), '0/' + resource + '/' + secret) #Init with resource to bind it
         self.user = user
         self.domain = domain
-        self.resource = resource
+        self.boundjid.resource = resource
         self.continent = continent
         self.vacuum = vacuum
         self.credentials['authzid'] = user
