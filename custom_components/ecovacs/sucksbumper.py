@@ -949,6 +949,9 @@ class EcoVacsXMPP(ClientXMPP):
         self.register_handler(Callback("general",
                                        MatchXPath('{jabber:client}iq/{com:ctl}query/{com:ctl}'),
                                        self._handle_ctl))
+        self.register_handler(Callback("Ping",
+                                       MatchXPath('{jabber:client}iq/{urn:xmpp:ping}ping/{urn:xmpp:ping}'),
+                                       self._handle_ping))
         self.ready_flag.set()
 
     def subscribe_to_ctls(self, function):
@@ -1173,6 +1176,10 @@ class EcoVacsXMPP(ClientXMPP):
         q.xml.append(ET.Element('ping', {'xmlns': 'urn:xmpp:ping'}))
         _LOGGER.debug("*** sending ping ***")
         q.send()
+
+    def _handle_ping(self, iq)
+        _LOGGER.debug("Pinged by %s", iq['from'])
+        iq.reply().send()
 
     def connect_and_wait_until_ready(self):        
         self.connect(self.server_address)
