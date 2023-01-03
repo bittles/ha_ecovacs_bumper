@@ -446,11 +446,15 @@ class VacBot():
     def connect_and_wait_until_ready(self):
         # use bmartins exmaple if defining our own server, couldn't get this to work without defining, probably xmpp port but idk
         if self.server_address:
-            logging.info("connecting")
+            logging.info("connecting to bumper ******************")
 #            self.xmpp.connect(self.server_address)
 #            self.xmpp.process()
-            self.xmpp.connect_and_wait_until_ready()
-            self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
+            if not self.vacuum['iotmq']:
+                self.xmpp.connect_and_wait_until_ready()
+                self.xmpp.schedule('Ping', 300, lambda: self.send_ping(), repeat=True)
+            else:
+                self.iotmq.connect_and_wait_until_ready()
+                self.iotmq.schedule(30, self.send_ping)
         # keep rest of bmartins fork intact
         else:
             if not self.vacuum['iotmq']:
