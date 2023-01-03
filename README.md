@@ -22,11 +22,14 @@ pointing to my bumper server.
 ## Home Assistant Install & Config
 ### HACS Install
 You can add this repository to your HACS: https://github.com/bittles/ha_ecovacs_bumper
+
 Then download with HACS, HACS -> Integrations -> Explore & Download Repositories -> EcovacsBumper
+
 Restart HASS.
 
 ### Manually Install
 Drop the ecovacs folder into your custom_components folder. 
+
 Restart HASS.
 
 ### Config
