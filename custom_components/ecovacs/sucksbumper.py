@@ -1177,7 +1177,7 @@ class EcoVacsXMPP(ClientXMPP):
         _LOGGER.debug("*** sending ping ***")
         q.send()
 
-    def _handle_ping(self, iq)
+    def _handle_ping(self, iq):
         _LOGGER.debug("Pinged by %s", iq['from'])
         iq.reply().send()
 
