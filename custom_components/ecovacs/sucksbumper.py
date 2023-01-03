@@ -474,7 +474,7 @@ class VacBot():
         if not self.vacuum['iotmq']:
 #            _LOGGER.info("connecting to NOT bumper, xmpp server ******************")
             self.xmpp.connect_and_wait_until_ready()
-            self.xmpp.schedule('Ping', 30, lambda: self.send_ping(), repeat=True)
+            self.xmpp.schedule('Ping', 300, lambda: self.send_ping(), repeat=True)
         else:
 #            _LOGGER.info("connecting to NOT bumper, mqtt server ******************")
             self.iotmq.connect_and_wait_until_ready()
