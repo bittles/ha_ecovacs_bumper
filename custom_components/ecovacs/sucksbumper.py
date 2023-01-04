@@ -69,9 +69,9 @@ class EcoVacsAPI:
         login_response = self.__call_login_by_it_token()
         self.user_access_token = login_response['token']
         if login_response['userId'] != self.uid:
-            logging.debug("Switching to shorter UID " + login_response['userId'])
+            LOGGER.debug("Switching to shorter UID " + login_response['userId'])
             self.uid = login_response['userId']
-        logging.debug("EcoVacsAPI connection complete")
+        LOGGER.debug("EcoVacsAPI connection complete")
 
     def __sign(self, params):
         result = params.copy()
