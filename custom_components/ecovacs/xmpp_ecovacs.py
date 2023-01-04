@@ -4,7 +4,7 @@ from threading import Event
 from sleekxmppfs import ClientXMPP, Callback, MatchXPath
 from sleekxmppfs.xmlstream import ET
 #from sleekxmppfs.exceptions import XMPPError
-from . import const
+from .const import _LOGGER
 
 #This is used by EcoVacsIOTMQ and EcoVacsXMPP for _ctl_to_dict
 def RepresentsInt(stringvar):

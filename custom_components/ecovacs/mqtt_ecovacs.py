@@ -11,7 +11,7 @@ from paho.mqtt import publish as MQTTPublish
 from paho.mqtt import subscribe as MQTTSubscribe
 from sleekxmppfs.xmlstream import ET
 
-from . import const
+from .const import _LOGGER
 
 #This is used by EcoVacsIOTMQ and EcoVacsXMPP for _ctl_to_dict
 def RepresentsInt(stringvar):

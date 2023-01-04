@@ -10,7 +10,7 @@ from sleekxmppfs.exceptions import XMPPError
 from .mqtt_ecovacs import EcoVacsIOTMQ
 from .xmpp_ecovacs import EcoVacsXMPP
 
-from . import const
+from .const import *
 
 def str_to_bool_or_cert(s):
     if s == 'True' or s == True:
