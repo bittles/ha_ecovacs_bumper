@@ -1,12 +1,11 @@
 """Support for Ecovacs Deebot vacuums."""
 import random
 import string
-##import asyncio ## to do will need to convert to slixmpp to do this i believe
+#import asyncio ## to do will need to convert to slixmpp to do this i believe
 
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_USERNAME,
-    CONF_VERIFY_SSL, # added
     EVENT_HOMEASSISTANT_STOP,
     Platform,
 )
@@ -25,6 +24,7 @@ from .const import (
     CONF_BUMPER,
     CONF_BUMPER_SERVER,
     SERVER_ADDRESS,
+    VERIFY_SSL,
     LOGGER
 )
 
@@ -37,8 +37,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_COUNTRY): vol.All(vol.Lower, cv.string),
                 vol.Required(CONF_CONTINENT): vol.All(vol.Lower, cv.string),
                 vol.Optional(CONF_BUMPER, default=False): cv.boolean,
-                vol.Optional(CONF_BUMPER_SERVER): cv.string,
-                vol.Optional(CONF_VERIFY_SSL, default=True): cv.boolean, # can probably get rid of this and set verify ssl false if bumper true
+                vol.Optional(CONF_BUMPER_SERVER): cv.string
             }
         )
     },
@@ -58,9 +57,8 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # if we're using bumper then define the server address
     if CONF_BUMPER == True:
         SERVER_ADDRESS = (config[DOMAIN].get(CONF_BUMPER_SERVER), 5223)
-    # if not make sure it's null
-    else:
-        SERVER_ADDRESS = None
+        VERIFY_SSL = False
+        # if not server address is null and verify ssl true from const
 
     ecovacs_api = EcoVacsAPI(
         ECOVACS_API_DEVICEID,
@@ -68,7 +66,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
         EcoVacsAPI.md5(config[DOMAIN].get(CONF_PASSWORD)),
         config[DOMAIN].get(CONF_COUNTRY),
         config[DOMAIN].get(CONF_CONTINENT),
-        config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
+        VERIFY_SSL # add to class call
     )
 
     devices = ecovacs_api.devices()
@@ -88,8 +86,8 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
             device,
             config[DOMAIN].get(CONF_CONTINENT).lower(),
             SERVER_ADDRESS, # include server address in class, if it's null shoul be no effect
-            config[DOMAIN].get(CONF_VERIFY_SSL), # verify ssl or not
-            monitor=True,
+            VERIFY_SSL, # verify ssl or not
+            monitor=True
         )
         hass.data[ECOVACS_DEVICES].append(vacbot)
 
