@@ -45,16 +45,22 @@ If you're not using bumper this SHOULD technically work no different than the Ho
 From the HASS ecovacs integration page:
 
 ```
-Note: For some countries, you will need to set continent to ww (meaning worldwide.) There is unfortunately no way to know the correct settings other than guessing and checking. See the py-sucks library protocol documentation for more information about what has been figured out about the Ecovacs servers.
+Note: For some countries, you will need to set continent to ww (meaning worldwide.) 
 
-Additional note: There are some issues during the password encoding. Using some special characters (e.g., -) in your password does not work.
+There is unfortunately no way to know the correct settings other than guessing and checking. 
+
+See the py-sucks library protocol documentation for more information about what has been figured out about the Ecovacs servers.
+
+Additional note: There are some issues during the password encoding. 
+
+Using some special characters (e.g., -) in your password does not work.
 ```
 
 From the sucks documentation:
 
 | country code | matching continent code |
 | --- | --- |
-| CH | ww or as (looks like might be some trial and error to see what works |
+| CH | ww or as |
 | TW, MY, JP, SG, TH, HK, IN, KR | as |
 | US | na |
 | FR, ES, UK, NO, MX, DE, PT, CH, AU, IT, NL, SE, BE, DK | eu |
