@@ -1,14 +1,7 @@
 """Support for Ecovacs Deebot vacuums."""
-import logging
 import random
 import string
-
-##import asyncio ## to do
-
-
-#just included the modified sucks in component
-from .sucksbumper import EcoVacsAPI, VacBot
-import voluptuous as vol
+##import asyncio ## to do will need to convert to slixmpp to do this i believe
 
 from homeassistant.const import (
     CONF_PASSWORD,
@@ -21,17 +14,19 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import discovery
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
-
-_LOGGER = logging.getLogger(__name__)
-
-DOMAIN = "ecovacs"
-
-CONF_COUNTRY = "country"
-CONF_CONTINENT = "continent"
-#bumper config vars
-CONF_BUMPER = "bumper"
-CONF_BUMPER_SERVER = "bumper_server"
-server_address = None
+import voluptuous as vol
+#just included the modified sucks in component
+from .sucksbumper import EcoVacsAPI, VacBot
+from .const import (
+    ECOVACS_DEVICES,
+    DOMAIN,
+    CONF_COUNTRY,
+    CONF_CONTINENT,
+    CONF_BUMPER,
+    CONF_BUMPER_SERVER,
+    SERVER_ADDRESS,
+    _LOGGER
+)
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -50,8 +45,6 @@ CONFIG_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-ECOVACS_DEVICES = "ecovacs_devices"
-
 # Generate a random device ID on each bootup
 ECOVACS_API_DEVICEID = "".join(
     random.choice(string.ascii_uppercase + string.digits) for _ in range(8)
@@ -64,10 +57,10 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.data[ECOVACS_DEVICES] = []
     # if we're using bumper then define the server address
     if CONF_BUMPER == True:
-        server_address = (config[DOMAIN].get(CONF_BUMPER_SERVER), 5223)
+        SERVER_ADDRESS = (config[DOMAIN].get(CONF_BUMPER_SERVER), 5223)
     # if not make sure it's null
     else:
-        server_address = None
+        SERVER_ADDRESS = None
 
     ecovacs_api = EcoVacsAPI(
         ECOVACS_API_DEVICEID,
@@ -94,7 +87,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
             ecovacs_api.user_access_token,
             device,
             config[DOMAIN].get(CONF_CONTINENT).lower(),
-            server_address, # include server address in class, if it's null shoul be no effect
+            SERVER_ADDRESS, # include server address in class, if it's null shoul be no effect
             config[DOMAIN].get(CONF_VERIFY_SSL), # verify ssl or not
             monitor=True,
         )
