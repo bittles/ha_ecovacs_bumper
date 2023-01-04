@@ -1,23 +1,14 @@
 # Home Assistant Ecovacs Custom Component with Bumper Support
-Replaces built in ecovacs component.  Designed to work with bumper, https://github.com/bmartin5692/bumper, a replacement for Ecovacs servers to truly get local control.
+Replaces built in ecovacs component, with some upgrades and fixes.  Allows SSL verification to be set to false to work with a self-hosted bumper server, https://github.com/bmartin5692/bumper, a replacement for Ecovacs servers to truly get local control.
 
-Works with bumper with my N79 and should work with at least other XMPP based ecovacs.  Don't know if changes will work with MQTT based ones.
+Works with bumper with my N79 and should work with other XMPP based ecovacs.  Catches some XMPP messages now that the default HASS one misses (at least with my Ecovacs), including some initial queries and also life span for filters and brushes.  Includes MQTT robot support from bmartin's fork that's basically unchanged in this since I don't have one of those robots.
 
 Should work as regular if bumper is false in config but haven't tested yet, goal was to get it all local.  Maybe mess around and test it in future.
 
-With bumper, my N79 commands would work but some queries had responses that included errno='', which bumper would flag as an error even though the full response was there. It never created attributes for the filters as one of the results.  If your debug logs are throwing errors and the errno is '' then my small fork of bumper may help https://github.com/bittles/bumper-fork 
+## Bumper Setup
+Check out bmartin's docs to setup a bumper server, https://bumper.readthedocs.io/.
 
-Based off the regular home assistant ecovacs config and bmartin's fork of sucks, https://github.com/bmartin5692/sucks. 
-I'm using the docker-compose example from my bumper forked from bmartin5692's, https://github.com/bmartin5692/bumper on an odroid-n2+.
-
-### DNS
-For DNS routing I have an Asus AX88u with asus-merlin installed running Adguard.  DNS rewrites in AdGuard for domains:
-```
-*.ecouser.net
-*.ecovacs.com
-*.ecovacs.net 
-```
-pointing to my bumper server.
+Based off the regular home assistant ecovacs components and bmartin's fork of sucks, https://github.com/bmartin5692/sucks. 
 
 ## Home Assistant Install & Config
 ### HACS Install
@@ -42,7 +33,7 @@ ecovacs:
   continent: 
   verify_ssl: true/false, use false if using bumper (optional, defaults true)
 ```
-Any username, password, country, and continent should work if using bumper.  Set verify_ssl to false for bumper.  If you're not using bumper this SHOULD technically work no different than the Home Assistant ecovacs integration but I haven't looked at it enough to be sure and I haven't tested it.
+Any username, password, country, and continent should work if using bumper.  Set verify_ssl to false if using bumper.  If you're not using bumper this SHOULD technically work no different than the Home Assistant ecovacs integration but I haven't tested it.
 
 ### Example Config
 ```
@@ -56,14 +47,16 @@ ecovacs:
 Just finished getting this working late 12/13/22 so not sure if everything works yet but will commit changes here if I update it or at least document issues.
 
 ### Logging
+If your debug logs are throwing errors and the errno is '' then my small fork of bumper may help https://github.com/bittles/bumper-fork, which also includes ability to disable the XMPP or MQTT servers seperately if you don't own one a robot that uses that protocol.
 ```
 logger:
   logs:
+    sleekxmpss: debug
     custom_components.ecovacs.sucksbumper: debug  # or whatever level you want
 ```
 
 ### To-Do:
-Make component async, use config_flow, create device and clean up some of the hass integration stuff.
+Make component async, use config_flow, create device and clean up some of the hass integration stuff.  Not in that order.
 
 ### Misc Info From Making This
 Commit history is a bit of a mess.  master branch shows changes from bmartins fork of sucks to v1.3.0 of this custom component.  dev branch shows commits from my attempts at testing and getting this to work.
