@@ -1,5 +1,4 @@
 import time
-
 import sched
 import threading
 import ssl

@@ -7,8 +7,8 @@ from collections import OrderedDict
 from sleekxmppfs.xmlstream import ET
 from sleekxmppfs.exceptions import XMPPError
 
-from .mqtt_ecovacs import EcoVacsIOTMQ
-from .xmpp_ecovacs import EcoVacsXMPP
+from .sucks_mqtt import EcoVacsIOTMQ
+from .sucks_xmpp import EcoVacsXMPP
 
 from .const import LOGGER
 from .sucks_const import *

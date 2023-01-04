@@ -13,15 +13,14 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import discovery
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-#just included the modified sucks in component
-from .sucksbumper import EcoVacsAPI, VacBot
+#use local sucks
+from .sucks import EcoVacsAPI, VacBot
 from .const import (
     ECOVACS_DEVICES,
     DOMAIN,
-
     CONF_CONTINENT,
     LOGGER
 )
