@@ -53,7 +53,7 @@ class EcoVacsAPI:
             #'deviceType': '2' - iphone
         }
         self.verify_ssl = str_to_bool_or_cert(verify_ssl)
-        _LOGGER.debug("Setting up EcoVacsAPI")
+        LOGGER.debug("Setting up EcoVacsAPI")
         self.resource = device_id[0:8]
         self.country = country
         self.continent = continent
@@ -85,34 +85,34 @@ class EcoVacsAPI:
         return result
 
     def __call_main_api(self, function, *args):
-        _LOGGER.debug("calling main api {} with {}".format(function, args))
+        LOGGER.debug("calling main api {} with {}".format(function, args))
         params = OrderedDict(args)
         params['requestId'] = self.md5(time.time())
         url = (EcoVacsAPI.MAIN_URL_FORMAT + "/" + function).format(**self.meta)
         api_response = requests.get(url, self.__sign(params), verify=self.verify_ssl)
         json = api_response.json()
-        _LOGGER.debug("got {}".format(json))
+        LOGGER.debug("got {}".format(json))
         if json['code'] == '0000':
             return json['data']
         elif json['code'] == '1005':
-            _LOGGER.warning("incorrect email or password")
+            LOGGER.warning("incorrect email or password")
             raise ValueError("incorrect email or password")
         else:
-            _LOGGER.error("call to {} failed with {}".format(function, json))
+            LOGGER.error("call to {} failed with {}".format(function, json))
             raise RuntimeError("failure code {} ({}) for call {} and parameters {}".format(
                 json['code'], json['msg'], function, args))
 
     def __call_user_api(self, function, args):
-        _LOGGER.debug("calling user api {} with {}".format(function, args))
+        LOGGER.debug("calling user api {} with {}".format(function, args))
         params = {'todo': function}
         params.update(args)
         response = requests.post(EcoVacsAPI.USER_URL_FORMAT.format(continent=self.continent), json=params, verify=self.verify_ssl)
         json = response.json()
-        _LOGGER.debug("got {}".format(json))
+        LOGGER.debug("got {}".format(json))
         if json['result'] == 'ok':
             return json
         else:
-            _LOGGER.error("call to {} failed with {}".format(function, json))
+            LOGGER.error("call to {} failed with {}".format(function, json))
             raise RuntimeError(
                 "failure {} ({}) for call {} and parameters {}".format(json['error'], json['errno'], function, params))
 
@@ -123,33 +123,33 @@ class EcoVacsAPI:
         else:
             params = {}
             params.update(args)
-        _LOGGER.debug("calling portal api {} function {} with {}".format(api, function, params))
+        LOGGER.debug("calling portal api {} function {} with {}".format(api, function, params))
         continent = self.continent
         if 'continent' in kwargs:
             continent = kwargs.get('continent')
         url = (EcoVacsAPI.PORTAL_URL_FORMAT + "/" + api).format(continent=continent, **self.meta)
         response = requests.post(url, json=params, verify=verify_ssl)
         json = response.json()
-        _LOGGER.debug("got {}".format(json))
+        LOGGER.debug("got {}".format(json))
         if api == self.USERSAPI:
             if json['result'] == 'ok':
                 return json
             elif json['result'] == 'fail':
                 if json['error'] == 'set token error.': # If it is a set token error try again
                     if not 'set_token' in kwargs:      
-                        _LOGGER.debug("loginByItToken set token error, trying again (2/3)")
+                        LOGGER.debug("loginByItToken set token error, trying again (2/3)")
                         return self.__call_portal_api(self.USERSAPI, function, args, verify_ssl=verify_ssl, set_token=1)
                     elif kwargs.get('set_token') == 1:
-                        _LOGGER.debug("loginByItToken set token error, trying again with ww (3/3)")
+                        LOGGER.debug("loginByItToken set token error, trying again with ww (3/3)")
                         return self.__call_portal_api(self.USERSAPI, function, args, verify_ssl=verify_ssl, set_token=2, continent="ww")
                     else:
-                        _LOGGER.debug("loginByItToken set token error, failed after 3 attempts")
+                        LOGGER.debug("loginByItToken set token error, failed after 3 attempts")
         if api.startswith(self.PRODUCTAPI):
             if json['code'] == 0:
                 return json
 
         else:
-            _LOGGER.error("call to {} failed with {}".format(function, json))
+            LOGGER.error("call to {} failed with {}".format(function, json))
             raise RuntimeError(
                 "failure {} ({}) for call {} and parameters {}".format(json['error'], json['errno'], function, params))
 
@@ -317,23 +317,23 @@ class VacBot():
             error = event['errs']
         if not error == '':
             self.errorEvents.notify(error)
-            _LOGGER.debug("*** error = " + error)
+            LOGGER.debug("*** error = " + error)
 
     def _handle_life_span(self, event):
         type = event['type']
         try:
             type = COMPONENT_FROM_ECOVACS[type]
         except KeyError:
-            _LOGGER.warning("Unknown component type: '" + type + "'")
+            LOGGER.warning("Unknown component type: '" + type + "'")
         if 'val' in event:
             lifespan = int(event['val']) / 100
-            _LOGGER.debug("**********Component " + type + " has lifespan of " + str(lifespan) + ".")
+            LOGGER.debug("**********Component " + type + " has lifespan of " + str(lifespan) + ".")
         else:
             lifespan = int(event['left']) / 60  #This works for a D901
         self.components[type] = lifespan
         lifespan_event = {'type': type, 'lifespan': lifespan}
         self.lifespanEvents.notify(lifespan_event)
-        _LOGGER.debug("*** life_span " + type + " = " + str(lifespan))
+        LOGGER.debug("*** life_span " + type + " = " + str(lifespan))
 
     def _handle_clean_report(self, event):
         type = event['type']
@@ -345,7 +345,7 @@ class VacBot():
                 if statustype == CLEAN_ACTION_STOP or statustype == CLEAN_ACTION_PAUSE:
                     type = statustype
         except KeyError:
-            _LOGGER.warning("Unknown cleaning status '" + type + "'")
+            LOGGER.warning("Unknown cleaning status '" + type + "'")
         self.clean_status = type
         self.vacuum_status = type
         fan = event.get('speed', None)
@@ -353,22 +353,22 @@ class VacBot():
             try:
                 fan = FAN_SPEED_FROM_ECOVACS[fan]
             except KeyError:
-                _LOGGER.warning("Unknown fan speed: '" + fan + "'")
+                LOGGER.warning("Unknown fan speed: '" + fan + "'")
         self.fan_speed = fan
         self.statusEvents.notify(self.vacuum_status)
         if self.fan_speed:
-            _LOGGER.debug("*** clean_status = " + self.clean_status + " fan_speed = " + self.fan_speed)
+            LOGGER.debug("*** clean_status = " + self.clean_status + " fan_speed = " + self.fan_speed)
         else:
-            _LOGGER.debug("*** clean_status = " + self.clean_status + " fan_speed = None")
+            LOGGER.debug("*** clean_status = " + self.clean_status + " fan_speed = None")
 
     def _handle_battery_info(self, iq):
         try:
             self.battery_status = float(iq['power']) / 100
         except ValueError:
-            _LOGGER.warning("couldn't parse battery status " + ET.tostring(iq))
+            LOGGER.warning("couldn't parse battery status " + ET.tostring(iq))
         else:
             self.batteryEvents.notify(self.battery_status)
-            _LOGGER.debug("*** battery_status = {:.0%}".format(self.battery_status))
+            LOGGER.debug("*** battery_status = {:.0%}".format(self.battery_status))
 
     def _handle_charge_state(self, event):
         if 'type' in event:
@@ -382,11 +382,11 @@ class VacBot():
                 status = 'idle'
             else: 
                 status = 'idle' #Fall back to Idle status
-                _LOGGER.error("Unknown charging status '" + event['errno'] + "'") #Log this so we can identify more errors    
+                LOGGER.error("Unknown charging status '" + event['errno'] + "'") #Log this so we can identify more errors    
         try:
             status = CHARGE_MODE_FROM_ECOVACS[status]
         except KeyError:
-            _LOGGER.warning("Unknown charging status '" + status + "'")
+            LOGGER.warning("Unknown charging status '" + status + "'")
         self.charge_status = status
         if status != 'idle' or self.vacuum_status == 'charging':
             # We have to ignore the idle messages, because all it means is that it's not
@@ -394,7 +394,7 @@ class VacBot():
             # of what the vacuum is currently up to.
             self.vacuum_status = status
             self.statusEvents.notify(self.vacuum_status)
-        _LOGGER.debug("*** charge_status = " + self.charge_status)
+        LOGGER.debug("*** charge_status = " + self.charge_status)
 
     def _vacuum_address(self):
         if not self.vacuum['iotmq']:
@@ -418,15 +418,15 @@ class VacBot():
                 if not self.iotmq.send_ping():
                     raise RuntimeError()
         except XMPPError as err:
-            _LOGGER.warning("Ping did not reach VacBot. Will retry.")
-            _LOGGER.debug("*** Error type: " + err.etype)
-            _LOGGER.debug("*** Error condition: " + err.condition)
+            LOGGER.warning("Ping did not reach VacBot. Will retry.")
+            LOGGER.debug("*** Error type: " + err.etype)
+            LOGGER.debug("*** Error condition: " + err.condition)
             self._failed_pings += 1
             if self._failed_pings >= 4:
                 self.vacuum_status = 'offline'
                 self.statusEvents.notify(self.vacuum_status)
         except RuntimeError as err:
-            _LOGGER.warning("Ping did not reach VacBot. Will retry.")
+            LOGGER.warning("Ping did not reach VacBot. Will retry.")
             self._failed_pings += 1
             if self._failed_pings >= 4:
                 self.vacuum_status = 'offline'
@@ -449,9 +449,9 @@ class VacBot():
             self.run(GetLifeSpan('side_brush'))
             self.run(GetLifeSpan('filter'))
         except XMPPError as err:
-            _LOGGER.warning("Component refresh requests failed to reach VacBot. Will try again later.")
-            _LOGGER.debug("*** Error type: " + err.etype)
-            _LOGGER.debug("*** Error condition: " + err.condition)
+            LOGGER.warning("Component refresh requests failed to reach VacBot. Will try again later.")
+            LOGGER.debug("*** Error type: " + err.etype)
+            LOGGER.debug("*** Error condition: " + err.condition)
 
     def refresh_statuses(self):
         try:
@@ -459,9 +459,9 @@ class VacBot():
             self.run(GetChargeState())
             self.run(GetBatteryState())
         except XMPPError as err:
-            _LOGGER.warning("Initial status requests failed to reach VacBot. Will try again on next ping.")
-            _LOGGER.debug("*** Error type: " + err.etype)
-            _LOGGER.debug("*** Error condition: " + err.condition)
+            LOGGER.warning("Initial status requests failed to reach VacBot. Will try again on next ping.")
+            LOGGER.debug("*** Error type: " + err.etype)
+            LOGGER.debug("*** Error condition: " + err.condition)
 
     def request_all_statuses(self):
         self.refresh_statuses()

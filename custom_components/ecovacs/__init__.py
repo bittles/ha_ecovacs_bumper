@@ -25,7 +25,7 @@ from .const import (
     CONF_BUMPER,
     CONF_BUMPER_SERVER,
     SERVER_ADDRESS,
-    _LOGGER
+    LOGGER
 )
 
 CONFIG_SCHEMA = vol.Schema(
@@ -52,7 +52,7 @@ ECOVACS_API_DEVICEID = "".join(
 
 def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Ecovacs component."""
-    _LOGGER.debug("Creating new Ecovacs component")
+    LOGGER.debug("Creating new Ecovacs component")
 
     hass.data[ECOVACS_DEVICES] = []
     # if we're using bumper then define the server address
@@ -72,10 +72,10 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
 
     devices = ecovacs_api.devices()
-    _LOGGER.debug("Ecobot devices: %s", devices)
+    LOGGER.debug("Ecobot devices: %s", devices)
 
     for device in devices:
-        _LOGGER.info(
+        LOGGER.info(
             "Discovered Ecovacs device on account: %s with nickname %s",
             device.get("did"),
             device.get("nick"),
@@ -96,7 +96,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     def stop(event: object) -> None:
         """Shut down open connections to Ecovacs XMPP server."""
         for device in hass.data[ECOVACS_DEVICES]:
-            _LOGGER.info(
+            LOGGER.info(
                 "Shutting down connection to Ecovacs device %s",
                 device.vacuum.get("did"),
             )
@@ -106,7 +106,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, stop)
 
     if hass.data[ECOVACS_DEVICES]:
-        _LOGGER.debug("Starting vacuum components")
+        LOGGER.debug("Starting vacuum components")
         discovery.load_platform(hass, Platform.VACUUM, DOMAIN, {}, config)
 
     return True

@@ -1,5 +1,5 @@
 import logging
-_LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 #ecovacs constants
 #init constants
