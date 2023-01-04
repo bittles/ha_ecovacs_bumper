@@ -59,7 +59,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
         SERVER_ADDRESS = (config[DOMAIN].get(CONF_BUMPER_SERVER), 5223)
         VERIFY_SSL = False
         # if not server address is null and verify ssl true from const
-    LOGGER.info("Bumper is set to %s with server address %s and verify ssl %s", CONF_BUMPER, SERVER_ADDRESS, VERIFY_SSL)
+    LOGGER.info("Bumper is set to %s with server address and verify ssl %s", CONF_BUMPER, VERIFY_SSL)
 
     ecovacs_api = EcoVacsAPI(
         ECOVACS_API_DEVICEID,
