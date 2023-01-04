@@ -95,7 +95,7 @@ class EcoVacsAPI:
         if json['code'] == '0000':
             return json['data']
         elif json['code'] == '1005':
-            LOGGER.warning("incorrect email or password")
+            LOGGER.error("incorrect email or password")
             raise ValueError("incorrect email or password")
         else:
             LOGGER.error("call to {} failed with {}".format(function, json))
@@ -317,7 +317,7 @@ class VacBot():
             error = event['errs']
         if not error == '':
             self.errorEvents.notify(error)
-            LOGGER.debug("*** error = " + error)
+            LOGGER.error("*** error = " + error)
 
     def _handle_life_span(self, event):
         type = event['type']
@@ -327,13 +327,13 @@ class VacBot():
             LOGGER.warning("Unknown component type: '" + type + "'")
         if 'val' in event:
             lifespan = int(event['val']) / 100
-            LOGGER.debug("**********Component " + type + " has lifespan of " + str(lifespan) + ".")
+            LOGGER.info("**********Component " + type + " has lifespan of " + str(lifespan) + ".")
         else:
             lifespan = int(event['left']) / 60  #This works for a D901
         self.components[type] = lifespan
         lifespan_event = {'type': type, 'lifespan': lifespan}
         self.lifespanEvents.notify(lifespan_event)
-        LOGGER.debug("*** life_span " + type + " = " + str(lifespan))
+        LOGGER.info("*** life_span " + type + " = " + str(lifespan))
 
     def _handle_clean_report(self, event):
         type = event['type']
@@ -357,9 +357,9 @@ class VacBot():
         self.fan_speed = fan
         self.statusEvents.notify(self.vacuum_status)
         if self.fan_speed:
-            LOGGER.debug("*** clean_status = " + self.clean_status + " fan_speed = " + self.fan_speed)
+            LOGGER.info("*** clean_status = " + self.clean_status + " fan_speed = " + self.fan_speed)
         else:
-            LOGGER.debug("*** clean_status = " + self.clean_status + " fan_speed = None")
+            LOGGER.info("*** clean_status = " + self.clean_status + " fan_speed = None")
 
     def _handle_battery_info(self, iq):
         try:
@@ -368,7 +368,7 @@ class VacBot():
             LOGGER.warning("couldn't parse battery status " + ET.tostring(iq))
         else:
             self.batteryEvents.notify(self.battery_status)
-            LOGGER.debug("*** battery_status = {:.0%}".format(self.battery_status))
+            LOGGER.info("*** battery_status = {:.0%}".format(self.battery_status))
 
     def _handle_charge_state(self, event):
         if 'type' in event:
@@ -394,7 +394,7 @@ class VacBot():
             # of what the vacuum is currently up to.
             self.vacuum_status = status
             self.statusEvents.notify(self.vacuum_status)
-        LOGGER.debug("*** charge_status = " + self.charge_status)
+        LOGGER.info("*** charge_status = " + self.charge_status)
 
     def _vacuum_address(self):
         if not self.vacuum['iotmq']:
@@ -419,8 +419,8 @@ class VacBot():
                     raise RuntimeError()
         except XMPPError as err:
             LOGGER.warning("Ping did not reach VacBot. Will retry.")
-            LOGGER.debug("*** Error type: " + err.etype)
-            LOGGER.debug("*** Error condition: " + err.condition)
+            LOGGER.error("*** Error type: " + err.etype)
+            LOGGER.error("*** Error condition: " + err.condition)
             self._failed_pings += 1
             if self._failed_pings >= 4:
                 self.vacuum_status = 'offline'
@@ -450,8 +450,8 @@ class VacBot():
             self.run(GetLifeSpan('filter'))
         except XMPPError as err:
             LOGGER.warning("Component refresh requests failed to reach VacBot. Will try again later.")
-            LOGGER.debug("*** Error type: " + err.etype)
-            LOGGER.debug("*** Error condition: " + err.condition)
+            LOGGER.error("*** Error type: " + err.etype)
+            LOGGER.error("*** Error condition: " + err.condition)
 
     def refresh_statuses(self):
         try:
@@ -460,8 +460,8 @@ class VacBot():
             self.run(GetBatteryState())
         except XMPPError as err:
             LOGGER.warning("Initial status requests failed to reach VacBot. Will try again on next ping.")
-            LOGGER.debug("*** Error type: " + err.etype)
-            LOGGER.debug("*** Error condition: " + err.condition)
+            LOGGER.error("*** Error type: " + err.etype)
+            LOGGER.error("*** Error condition: " + err.condition)
 
     def request_all_statuses(self):
         self.refresh_statuses()

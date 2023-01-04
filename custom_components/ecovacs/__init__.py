@@ -104,9 +104,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Listen for HA stop to disconnect.
     hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, stop)
-
     if hass.data[ECOVACS_DEVICES]:
         LOGGER.debug("Starting vacuum components")
         discovery.load_platform(hass, Platform.VACUUM, DOMAIN, {}, config)
-
     return True
