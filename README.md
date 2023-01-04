@@ -1,5 +1,5 @@
 # Home Assistant Ecovacs Custom Component with Bumper Support
-Replaces built in ecovacs component, with some upgrades and fixes.  Allows SSL verification to be set to false to work with a self-hosted bumper server, https://github.com/bmartin5692/bumper, a replacement for Ecovacs servers to truly get local control.
+Based off the regular home assistant ecovacs components and bmartin's fork of sucks, https://github.com/bmartin5692/sucks.  Replaces built in ecovacs component, with some upgrades and fixes.  Allows SSL verification to be set to false to work with a self-hosted bumper server, https://github.com/bmartin5692/bumper, a replacement for Ecovacs servers to truly get local control.
 
 Works with bumper with my N79 and should work with other XMPP based ecovacs.  Catches some XMPP messages now that the default HASS one misses (at least with my Ecovacs), including some initial queries and also life span for filters and brushes.  Includes MQTT robot support from bmartin's fork that's basically unchanged in this since I don't have one of those robots.
 
@@ -7,8 +7,6 @@ Should work as regular if bumper is false in config but haven't tested yet, goal
 
 ## Bumper Setup
 Check out bmartin's docs to setup a bumper server, https://bumper.readthedocs.io/.
-
-Based off the regular home assistant ecovacs components and bmartin's fork of sucks, https://github.com/bmartin5692/sucks. 
 
 ## Home Assistant Install & Config
 ### HACS Install
@@ -24,18 +22,7 @@ Drop the ecovacs folder into your custom_components folder.
 Restart HASS.
 
 ### Config
-In your configuration.yaml:
-```
-ecovacs:
-  username: 
-  password: 
-  country: 
-  continent: 
-  verify_ssl: true/false, use false if using bumper (optional, defaults true)
-```
-Any username, password, country, and continent should work if using bumper.  Set verify_ssl to false if using bumper.  If you're not using bumper this SHOULD technically work no different than the Home Assistant ecovacs integration but I haven't tested it.
-
-### Example Config
+Example in configuration.yaml:
 ```
 ecovacs:
   username: bumper
@@ -44,8 +31,29 @@ ecovacs:
   continent: na
   verify_ssl: false
 ```
-Just finished getting this working late 12/13/22 so not sure if everything works yet but will commit changes here if I update it or at least document issues.
+If you're not using bumper this SHOULD technically work no different than the Home Assistant ecovacs integration but I haven't tested it.
 
+| Paremeter  | Description | Required/Optional  |
+| --- | --- | --- |
+| username  | Ecovacs username, can be anything if using bumper  | required  |
+| password  | Ecovacs password, can be anything if using bumper  | required  |
+| country  | Ecovacs country, can be anything if using bumper  | required  |
+| continent  | Ecovacs continent, can be anything if using bumper  | required  |
+| verify_ssl  | true/false, defaults to true. Use false if using bumper  | optional  |
+
+#### Country/Continent Values and Pairs
+From the HASS ecovacs integration page:
+```Note: For some countries, you will need to set continent to ww (meaning worldwide.) There is unfortunately no way to know the correct settings other than guessing and checking. See the py-sucks library protocol documentation for more information about what has been figured out about the Ecovacs servers.
+
+Additional note: There are some issues during the password encoding. Using some special characters (e.g., -) in your password does not work.```
+From the sucks documentation:
+| country code | matcing continent code |
+| --- | --- |
+| CH | ww or as (looks like might be some trial and error to see what works |
+| TW, MY, JP, SG, TH, HK, IN, KR | as |
+| US | na |
+| FR, ES, UK, NO, MX, DE, PT, CH, AU, IT, NL, SE, BE, DK | eu |
+| Any other country code | ww |
 ### Logging
 If your debug logs are throwing errors and the errno is '' then my small fork of bumper may help https://github.com/bittles/bumper-fork, which also includes ability to disable the XMPP or MQTT servers seperately if you don't own one a robot that uses that protocol.
 ```
