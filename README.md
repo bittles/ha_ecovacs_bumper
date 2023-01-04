@@ -52,7 +52,7 @@ Additional note: There are some issues during the password encoding. Using some 
 
 From the sucks documentation:
 
-| country code | matcing continent code |
+| country code | matching continent code |
 | --- | --- |
 | CH | ww or as (looks like might be some trial and error to see what works |
 | TW, MY, JP, SG, TH, HK, IN, KR | as |
