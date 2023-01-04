@@ -1,19 +1,13 @@
 """Support for Ecovacs Deebot vacuums."""
-import logging
 import random
 import string
-
-##import asyncio ## to do
-
-
-#just included the modified sucks in component
-from .sucksbumper import EcoVacsAPI, VacBot
-import voluptuous as vol
+#import asyncio ## to do will need to convert to slixmpp to do this i believe
 
 from homeassistant.const import (
-    CONF_PASSWORD,
     CONF_USERNAME,
-    CONF_VERIFY_SSL, # added
+    CONF_PASSWORD,
+    CONF_COUNTRY,
+    CONF_VERIFY_SSL,
     EVENT_HOMEASSISTANT_STOP,
     Platform,
 )
@@ -21,17 +15,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import discovery
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
+import voluptuous as vol
+#just included the modified sucks in component
+from .sucksbumper import EcoVacsAPI, VacBot
+from .const import (
+    ECOVACS_DEVICES,
+    DOMAIN,
 
-_LOGGER = logging.getLogger(__name__)
-
-DOMAIN = "ecovacs"
-
-CONF_COUNTRY = "country"
-CONF_CONTINENT = "continent"
-#bumper config vars
-CONF_BUMPER = "bumper"
-CONF_BUMPER_SERVER = "bumper_server"
-server_address = None
+    CONF_CONTINENT,
+    LOGGER
+)
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -41,16 +34,12 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_PASSWORD): cv.string,
                 vol.Required(CONF_COUNTRY): vol.All(vol.Lower, cv.string),
                 vol.Required(CONF_CONTINENT): vol.All(vol.Lower, cv.string),
-                vol.Optional(CONF_BUMPER, default=False): cv.boolean,
-                vol.Optional(CONF_BUMPER_SERVER): cv.string,
-                vol.Optional(CONF_VERIFY_SSL, default=True): cv.boolean, # can probably get rid of this and set verify ssl false if bumper true
+                vol.Optional(CONF_VERIFY_SSL, default=True): cv.boolean, # can probably get rid of this and set verify ssl false if
             }
         )
     },
     extra=vol.ALLOW_EXTRA,
 )
-
-ECOVACS_DEVICES = "ecovacs_devices"
 
 # Generate a random device ID on each bootup
 ECOVACS_API_DEVICEID = "".join(
@@ -59,15 +48,9 @@ ECOVACS_API_DEVICEID = "".join(
 
 def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Ecovacs component."""
-    _LOGGER.debug("Creating new Ecovacs component")
-
+    LOGGER.debug("Creating new Ecovacs component")
     hass.data[ECOVACS_DEVICES] = []
-    # if we're using bumper then define the server address
-    if CONF_BUMPER == True:
-        server_address = (config[DOMAIN].get(CONF_BUMPER_SERVER), 5223)
-    # if not make sure it's null
-    else:
-        server_address = None
+    SERVER_ADDRESS = None
 
     ecovacs_api = EcoVacsAPI(
         ECOVACS_API_DEVICEID,
@@ -79,10 +62,10 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
 
     devices = ecovacs_api.devices()
-    _LOGGER.debug("Ecobot devices: %s", devices)
+    LOGGER.debug("Ecobot devices: %s", devices)
 
     for device in devices:
-        _LOGGER.info(
+        LOGGER.info(
             "Discovered Ecovacs device on account: %s with nickname %s",
             device.get("did"),
             device.get("nick"),
@@ -94,16 +77,16 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
             ecovacs_api.user_access_token,
             device,
             config[DOMAIN].get(CONF_CONTINENT).lower(),
-            server_address, # include server address in class, if it's null shoul be no effect
-            config[DOMAIN].get(CONF_VERIFY_SSL), # verify ssl or not
-            monitor=True,
+            SERVER_ADDRESS, # include server address in class, if it's null should be no effect
+            config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
+            monitor=True
         )
         hass.data[ECOVACS_DEVICES].append(vacbot)
 
     def stop(event: object) -> None:
         """Shut down open connections to Ecovacs XMPP server."""
         for device in hass.data[ECOVACS_DEVICES]:
-            _LOGGER.info(
+            LOGGER.info(
                 "Shutting down connection to Ecovacs device %s",
                 device.vacuum.get("did"),
             )
@@ -111,9 +94,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Listen for HA stop to disconnect.
     hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, stop)
-
     if hass.data[ECOVACS_DEVICES]:
-        _LOGGER.debug("Starting vacuum components")
+        LOGGER.debug("Starting vacuum components")
         discovery.load_platform(hass, Platform.VACUUM, DOMAIN, {}, config)
-
     return True
