@@ -46,7 +46,9 @@ From the HASS ecovacs integration page:
 ```Note: For some countries, you will need to set continent to ww (meaning worldwide.) There is unfortunately no way to know the correct settings other than guessing and checking. See the py-sucks library protocol documentation for more information about what has been figured out about the Ecovacs servers.
 
 Additional note: There are some issues during the password encoding. Using some special characters (e.g., -) in your password does not work.```
+
 From the sucks documentation:
+
 | country code | matcing continent code |
 | --- | --- |
 | CH | ww or as (looks like might be some trial and error to see what works |
@@ -54,6 +56,7 @@ From the sucks documentation:
 | US | na |
 | FR, ES, UK, NO, MX, DE, PT, CH, AU, IT, NL, SE, BE, DK | eu |
 | Any other country code | ww |
+
 ### Logging
 If your debug logs are throwing errors and the errno is '' then my small fork of bumper may help https://github.com/bittles/bumper-fork, which also includes ability to disable the XMPP or MQTT servers seperately if you don't own one a robot that uses that protocol.
 ```
