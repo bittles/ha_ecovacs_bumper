@@ -23,8 +23,6 @@ from .const import (
     CONF_CONTINENT,
     CONF_BUMPER,
     CONF_BUMPER_SERVER,
-    SERVER_ADDRESS,
-    VERIFY_SSL,
     LOGGER
 )
 
@@ -52,14 +50,18 @@ ECOVACS_API_DEVICEID = "".join(
 def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Ecovacs component."""
     LOGGER.debug("Creating new Ecovacs component")
+    
 
     hass.data[ECOVACS_DEVICES] = []
     # if we're using bumper then define the server address
     if CONF_BUMPER == True:
         SERVER_ADDRESS = (config[DOMAIN].get(CONF_BUMPER_SERVER), 5223)
         VERIFY_SSL = False
-        # if not server address is null and verify ssl true from const
-    LOGGER.info("Bumper is set to %s with server address and verify ssl %s", CONF_BUMPER, VERIFY_SSL)
+    else:
+        SERVER_ADDRESS = None
+        VERIFY_SSL = True
+        # if not server address is null and verify ssl true
+    LOGGER.info("Bumper is set to %s with server address %s and verify ssl %s", CONF_BUMPER, SERVER_ADDRESS, VERIFY_SSL)
 
     ecovacs_api = EcoVacsAPI(
         ECOVACS_API_DEVICEID,

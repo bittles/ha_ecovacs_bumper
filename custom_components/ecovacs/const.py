@@ -10,5 +10,3 @@ CONF_CONTINENT = "continent"
 #bumper config vars
 CONF_BUMPER = "bumper"
 CONF_BUMPER_SERVER = "bumper_server"
-SERVER_ADDRESS = None
-VERIFY_SSL = True
