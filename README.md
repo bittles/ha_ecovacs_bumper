@@ -61,7 +61,7 @@ From the sucks documentation:
 | Any other country code | ww |
 
 ### Logging
-If your debug logs are throwing errors and the errno is '' then my small fork of bumper may help https://github.com/bittles/bumper-fork, which also includes ability to disable the XMPP or MQTT servers seperately if you don't own one a robot that uses that protocol.
+If your debug logs are throwing errors and the errno is '' then my small fork of bumper may help https://github.com/bittles/bumper-fork, which also includes ability to disable the XMPP or MQTT servers seperately if you don't own a robot that uses that protocol.
 ```
 logger:
   logs:
