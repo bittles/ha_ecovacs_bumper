@@ -46,13 +46,10 @@ From the HASS ecovacs integration page:
 
 ```
 Note: For some countries, you will need to set continent to ww (meaning worldwide.) 
-
 There is unfortunately no way to know the correct settings other than guessing and checking. 
-
 See the py-sucks library protocol documentation for more information about what has been figured out about the Ecovacs servers.
 
 Additional note: There are some issues during the password encoding. 
-
 Using some special characters (e.g., -) in your password does not work.
 ```
 
