@@ -3,7 +3,7 @@ Based off the regular home assistant ecovacs components and bmartin's fork of su
 
 Works with bumper with my N79 and should work with other XMPP based ecovacs.  Catches some XMPP messages now that the default HASS one misses (at least with my Ecovacs), including some initial queries and also life span for filters and brushes.  Includes MQTT robot support from bmartin's fork that's basically unchanged in this since I don't have one of those robots.
 
-Should work as regular if bumper is false in config but haven't tested yet, goal was to get it all local.  Maybe mess around and test it in future.
+Should work as regular without bumper if verify_ssl is true or omitted in config but haven't tested yet, goal was to get it all local.  Maybe mess around and test it in future.
 
 ## Bumper Setup
 Check out bmartin's docs to setup a bumper server, https://bumper.readthedocs.io/.
