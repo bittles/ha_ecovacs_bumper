@@ -38,7 +38,7 @@ def setup_platform(
 class EcovacsVacuum(VacuumEntity):
     """Ecovacs Vacuums such as Deebot."""
 
-    _attr_fan_speed_list = [sucksbumper.FAN_SPEED_NORMAL, sucksbumper.FAN_SPEED_HIGH]
+    _attr_fan_speed_list = [sucks.FAN_SPEED_NORMAL, sucks.FAN_SPEED_HIGH]
     _attr_should_poll = False
     _attr_supported_features = (
         VacuumEntityFeature.BATTERY
@@ -53,7 +53,7 @@ class EcovacsVacuum(VacuumEntity):
         | VacuumEntityFeature.FAN_SPEED
     )
 
-    def __init__(self, device: sucksbumper.VacBot) -> None:
+    def __init__(self, device: sucks.VacBot) -> None:
         """Initialize the Ecovacs Vacuum."""
         self.device = device
         self.device.connect_and_wait_until_ready()
@@ -112,7 +112,7 @@ class EcovacsVacuum(VacuumEntity):
     def return_to_base(self, **kwargs: Any) -> None:
         """Set the vacuum cleaner to return to the dock."""
 
-        self.device.run(sucksbumper.Charge())
+        self.device.run(sucks.Charge())
 
     @property
     def battery_icon(self) -> str:
@@ -137,7 +137,7 @@ class EcovacsVacuum(VacuumEntity):
     def turn_on(self, **kwargs: Any) -> None:
         """Turn the vacuum on and start cleaning."""
 
-        self.device.run(sucksbumper.Clean())
+        self.device.run(sucks.Clean())
 
     def turn_off(self, **kwargs: Any) -> None:
         """Turn the vacuum off stopping the cleaning and returning home."""
@@ -146,23 +146,23 @@ class EcovacsVacuum(VacuumEntity):
     def stop(self, **kwargs: Any) -> None:
         """Stop the vacuum cleaner."""
 
-        self.device.run(sucksbumper.Stop())
+        self.device.run(sucks.Stop())
 
     def clean_spot(self, **kwargs: Any) -> None:
         """Perform a spot clean-up."""
 
-        self.device.run(sucksbumper.Spot())
+        self.device.run(sucks.Spot())
 
     def locate(self, **kwargs: Any) -> None:
         """Locate the vacuum cleaner."""
 
-        self.device.run(sucksbumper.PlaySound())
+        self.device.run(sucks.PlaySound())
 
     def set_fan_speed(self, fan_speed: str, **kwargs: Any) -> None:
         """Set fan speed."""
         if self.is_on:
 
-            self.device.run(sucksbumper.Clean(mode=self.device.clean_status, speed=fan_speed))
+            self.device.run(sucks.Clean(mode=self.device.clean_status, speed=fan_speed))
 
     def send_command(
         self,
@@ -171,7 +171,7 @@ class EcovacsVacuum(VacuumEntity):
         **kwargs: Any,
     ) -> None:
         """Send a command to a vacuum cleaner."""
-        self.device.run(sucksbumper.VacBotCommand(command, params))
+        self.device.run(sucks.VacBotCommand(command, params))
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
