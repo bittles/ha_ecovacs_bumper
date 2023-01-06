@@ -5,7 +5,7 @@ import logging
 from typing import Any
 
 #sucks
-from . import sucksbumper
+from . import sucks
 
 from homeassistant.components.vacuum import VacuumEntity, VacuumEntityFeature
 from homeassistant.core import HomeAssistant
