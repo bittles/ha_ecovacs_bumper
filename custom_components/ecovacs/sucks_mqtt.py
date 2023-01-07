@@ -4,13 +4,16 @@ import threading
 import ssl
 import requests
 import stringcase
+import logging
 from threading import Event
 from paho.mqtt.client import Client  as ClientMQTT
 from paho.mqtt import publish as MQTTPublish
 from paho.mqtt import subscribe as MQTTSubscribe
 from sleekxmppfs.xmlstream import ET
 
-from .const import LOGGER
+#from .const import LOGGER
+
+_LOGGER = logging.getLogger(__name__)
 
 #This is used by EcoVacsIOTMQ and EcoVacsXMPP for _ctl_to_dict
 def RepresentsInt(stringvar):
@@ -83,19 +86,19 @@ class EcoVacsIOTMQ(ClientMQTT):
 
     def on_connect(self, client, userdata, flags, rc):
         if rc != 0:
-            LOGGER.error("EcoVacsMQTT - error connecting with MQTT Return {}".format(rc))
+            _LOGGER.error("EcoVacsMQTT - error connecting with MQTT Return {}".format(rc))
             raise RuntimeError("EcoVacsMQTT - error connecting with MQTT Return {}".format(rc))    
         else:
-            LOGGER.debug("EcoVacsMQTT - Connected with result code "+str(rc))
-            LOGGER.debug("EcoVacsMQTT - Subscribing to all")        
+            _LOGGER.debug("EcoVacsMQTT - Connected with result code "+str(rc))
+            _LOGGER.debug("EcoVacsMQTT - Subscribing to all")        
             self.subscribe('iot/atr/+/' + self.vacuum['did'] + '/' + self.vacuum['class'] + '/' + self.vacuum['resource'] + '/+', qos=0)
             self.ready_flag.set()
 
     #def on_log(self, client, userdata, level, buf): #This is very noisy and verbose
-    #    LOGGER.debug("EcoVacsMQTT Log: {} ".format(buf))
+    #    _LOGGER.debug("EcoVacsMQTT Log: {} ".format(buf))
    
     def send_ping(self):
-        LOGGER.debug("*** MQTT sending ping ***")
+        _LOGGER.debug("*** MQTT sending ping ***")
         rc = self._send_simple_command(MQTTPublish.paho.PINGREQ)
         if rc == MQTTPublish.paho.MQTT_ERR_SUCCESS:
             return True
@@ -106,7 +109,7 @@ class EcoVacsIOTMQ(ClientMQTT):
         if action.name == "Clean": #For handling Clean when action not specified (i.e. CLI)
             action.args['clean']['act'] = CLEAN_ACTION_TO_ECOVACS['start'] #Inject a start action
         c = self._wrap_command(action, recipient)
-        LOGGER.debug('Sending command {0}'.format(c))
+        _LOGGER.debug('Sending command {0}'.format(c))
         self._handle_ctl_api(action, 
             self.__call_iotdevmanager_api(c ,verify_ssl=self.verify_ssl )
             )
@@ -134,7 +137,7 @@ class EcoVacsIOTMQ(ClientMQTT):
         }     
 
     def __call_iotdevmanager_api(self, args, verify_ssl=True):
-        LOGGER.debug("calling iotdevmanager api with {}".format(args))
+        _LOGGER.debug("calling iotdevmanager api with {}".format(args))
         params = {}
         params.update(args)
         url = (EcoVacsAPI.PORTAL_URL_FORMAT + "/iot/devmanager.do").format(continent=self.continent)
@@ -142,7 +145,7 @@ class EcoVacsIOTMQ(ClientMQTT):
         try: #The RestAPI sometimes doesnt provide a response depending on command, reduce timeout to 3 to accomodate and make requests faster
             response = requests.post(url, json=params, timeout=3, verify=verify_ssl) #May think about having timeout as an arg that could be provided in the future
         except requests.exceptions.ReadTimeout:
-            LOGGER.debug("call to iotdevmanager failed with ReadTimeout")
+            _LOGGER.debug("call to iotdevmanager failed with ReadTimeout")
             return {}
         json = response.json()
         if json['ret'] == 'ok':
@@ -151,11 +154,11 @@ class EcoVacsIOTMQ(ClientMQTT):
             if 'debug' in json:
                 if json['debug'] == 'wait for response timed out': 
                     #TODO - Maybe handle timeout for IOT better in the future
-                    LOGGER.error("call to iotdevmanager failed with {}".format(json))
+                    _LOGGER.error("call to iotdevmanager failed with {}".format(json))
                     return {}
             else:
                 #TODO - Not sure if we want to raise an error yet, just return empty for now
-                LOGGER.error("call to iotdevmanager failed with {}".format(json))
+                _LOGGER.error("call to iotdevmanager failed with {}".format(json))
                 return {}
                 #raise RuntimeError(
                 #"failure {} ({}) for call {} and parameters {}".format(json['error'], json['errno'], function, params))
@@ -195,7 +198,7 @@ class EcoVacsIOTMQ(ClientMQTT):
         return result
 
     def _handle_ctl_mqtt(self, client, userdata, message):
-        #LOGGER.debug("EcoVacs MQTT Received Message on Topic: {} - Message: {}".format(message.topic, str(message.payload.decode("utf-8"))))
+        #_LOGGER.debug("EcoVacs MQTT Received Message on Topic: {} - Message: {}".format(message.topic, str(message.payload.decode("utf-8"))))
         as_dict = self._ctl_to_dict_mqtt(message.topic, str(message.payload.decode("utf-8")))
         if as_dict is not None:
             for s in self.ctl_subscribers:

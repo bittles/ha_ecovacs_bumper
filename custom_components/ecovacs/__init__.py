@@ -1,7 +1,16 @@
 """Support for Ecovacs Deebot vacuums."""
+import asyncio
+from functools import partial
+import async_timeout
+
 import random
 import string
-#import asyncio ## to do will need to convert to slixmpp to do this i believe
+import logging
+# Use local sucks
+from .sucks import EcoVacsAPI, VacBot
+
+from homeassistant import exceptions
+from homeassistant.config_entries import ConfigEntry
 
 from homeassistant.const import (
     CONF_USERNAME,
@@ -9,36 +18,39 @@ from homeassistant.const import (
     CONF_COUNTRY,
     CONF_VERIFY_SSL,
     EVENT_HOMEASSISTANT_STOP,
-    Platform,
 )
+
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import discovery
-from homeassistant.helpers.typing import ConfigType
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
-#use local sucks
-from .sucks import EcoVacsAPI, VacBot
+
 from .const import (
     ECOVACS_DEVICES,
     DOMAIN,
+    PLATFORMS,
     CONF_CONTINENT,
-    LOGGER
 )
 
-CONFIG_SCHEMA = vol.Schema(
-    {
-        DOMAIN: vol.Schema(
-            {
-                vol.Required(CONF_USERNAME): cv.string,
-                vol.Required(CONF_PASSWORD): cv.string,
-                vol.Required(CONF_COUNTRY): vol.All(vol.Lower, cv.string),
-                vol.Required(CONF_CONTINENT): vol.All(vol.Lower, cv.string),
-                vol.Optional(CONF_VERIFY_SSL, default=True): cv.boolean, # can probably get rid of this and set verify ssl false if
-            }
-        )
-    },
-    extra=vol.ALLOW_EXTRA,
-)
+# from homeassistant.core import HomeAssistant
+# from homeassistant.helpers import discovery
+# from homeassistant.helpers.typing import ConfigType
+# import homeassistant.helpers.config_validation as cv
+# import voluptuous as vol
+
+_LOGGER = logging.getLogger(__name__)
+
+# CONFIG_SCHEMA = vol.Schema(
+    # {
+        # DOMAIN: vol.Schema(
+            # {
+                # vol.Required(CONF_USERNAME): cv.string,
+                # vol.Required(CONF_PASSWORD): cv.string,
+                # vol.Required(CONF_COUNTRY): vol.All(vol.Lower, cv.string),
+                # vol.Required(CONF_CONTINENT): vol.All(vol.Lower, cv.string),
+                # vol.Optional(CONF_VERIFY_SSL, default=True): cv.boolean, # can probably get rid of this and set verify ssl false if
+            # }
+        # )
+    # },
+    # extra=vol.ALLOW_EXTRA,
+# )
 
 # Generate a random device ID on each bootup
 ECOVACS_API_DEVICEID = "".join(
@@ -47,7 +59,7 @@ ECOVACS_API_DEVICEID = "".join(
 
 def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Ecovacs component."""
-    LOGGER.debug("Creating new Ecovacs component")
+    _LOGGER.debug("Creating new Ecovacs component")
     hass.data[ECOVACS_DEVICES] = []
     SERVER_ADDRESS = None
 
@@ -61,10 +73,10 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
 
     devices = ecovacs_api.devices()
-    LOGGER.debug("Ecobot devices: %s", devices)
+    _LOGGER.debug("Ecobot devices: %s", devices)
 
     for device in devices:
-        LOGGER.info(
+        _LOGGER.info(
             "Discovered Ecovacs device on account: %s with nickname %s",
             device.get("did"),
             device.get("nick"),
@@ -85,7 +97,7 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     def stop(event: object) -> None:
         """Shut down open connections to Ecovacs XMPP server."""
         for device in hass.data[ECOVACS_DEVICES]:
-            LOGGER.info(
+            _LOGGER.info(
                 "Shutting down connection to Ecovacs device %s",
                 device.vacuum.get("did"),
             )
@@ -94,6 +106,70 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # Listen for HA stop to disconnect.
     hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, stop)
     if hass.data[ECOVACS_DEVICES]:
-        LOGGER.debug("Starting vacuum components")
+        _LOGGER.debug("Starting vacuum components")
         discovery.load_platform(hass, Platform.VACUUM, DOMAIN, {}, config)
+    return True
+
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Set the config entry up."""
+    # Set up Ecovacs platforms with config entry
+    _LOGGER.debug("Creating new Ecovacs component")
+    hass.data[ECOVACS_DEVICES] = []
+    SERVER_ADDRESS = None
+
+    ecovacs_api = EcoVacsAPI(
+        ECOVACS_API_DEVICEID,
+        config[DOMAIN].get(CONF_USERNAME),
+        EcoVacsAPI.md5(config[DOMAIN].get(CONF_PASSWORD)),
+        config[DOMAIN].get(CONF_COUNTRY),
+        config[DOMAIN].get(CONF_CONTINENT),
+        config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
+    )
+
+
+    if not config_entry.options:
+        hass.config_entries.async_update_entry(
+            config_entry,
+            options={
+                CONF_CONTINUOUS: config_entry.data[CONF_CONTINUOUS],
+                CONF_DELAY: config_entry.data[CONF_DELAY],
+            },
+        )
+
+    roomba = await hass.async_add_executor_job(
+        partial(
+            RoombaFactory.create_roomba,
+            address=config_entry.data[CONF_HOST],
+            blid=config_entry.data[CONF_BLID],
+            password=config_entry.data[CONF_PASSWORD],
+            continuous=config_entry.options[CONF_CONTINUOUS],
+            delay=config_entry.options[CONF_DELAY],
+        )
+    )
+
+    try:
+        if not await async_connect_or_timeout(hass, roomba):
+            return False
+    except CannotConnect as err:
+        raise exceptions.ConfigEntryNotReady from err
+
+    async def _async_disconnect_roomba(event):
+        await async_disconnect_or_timeout(hass, roomba)
+
+    cancel_stop = hass.bus.async_listen_once(
+        EVENT_HOMEASSISTANT_STOP, _async_disconnect_roomba
+    )
+
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][config_entry.entry_id] = {
+        ROOMBA_SESSION: roomba,
+        BLID: config_entry.data[CONF_BLID],
+        CANCEL_STOP: cancel_stop,
+    }
+
+    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
+
+    if not config_entry.update_listeners:
+        config_entry.add_update_listener(async_update_options)
+
     return True

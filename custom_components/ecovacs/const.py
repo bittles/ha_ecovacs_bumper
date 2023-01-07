@@ -1,8 +1,8 @@
-import logging
-LOGGER = logging.getLogger(__name__)
+""" Ecovacs constants. """
+from homeassistant.const import Platform
 
-#ecovacs constants
-#init constants
-ECOVACS_DEVICES = "ecovacs_devices"
 DOMAIN = "ecovacs"
+PLATFORMS = [Platform.Vacuum]
+ECOVACS_DEVICES = "ecovacs_devices"
+
 CONF_CONTINENT = "continent"

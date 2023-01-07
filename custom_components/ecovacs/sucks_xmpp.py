@@ -1,11 +1,13 @@
 import stringcase
 import random
+import logging
 from threading import Event
 from sleekxmppfs import ClientXMPP, Callback, MatchXPath
 from sleekxmppfs.xmlstream import ET
 #from sleekxmppfs.exceptions import XMPPError
-from .const import LOGGER
+#from .const import LOGGER
 
+_LOGGER = logging.getLogger(__name__)
 #This is used by EcoVacsIOTMQ and EcoVacsXMPP for _ctl_to_dict
 def RepresentsInt(stringvar):
     try: 
@@ -35,8 +37,8 @@ class EcoVacsXMPP(ClientXMPP):
         self.ready_flag.wait()
 
     def session_start(self, event):
-        LOGGER.debug("----------------- starting session ----------------")
-        LOGGER.debug("event = {}".format(event))
+        _LOGGER.debug("----------------- starting session ----------------")
+        _LOGGER.debug("event = {}".format(event))
         self.register_handler(Callback("general",
                                        MatchXPath('{jabber:client}iq/{com:ctl}query/{com:ctl}'),
                                        self._handle_ctl))
@@ -63,7 +65,7 @@ class EcoVacsXMPP(ClientXMPP):
         try: # check for child xml
             childxml = xml[0]
         except IndexError:
-            LOGGER.debug("No child xml")
+            _LOGGER.debug("No child xml")
         if 'td' not in result:
             # Handle response data with no 'td'
             if 'type' in result: # single element with type and val
@@ -98,7 +100,7 @@ class EcoVacsXMPP(ClientXMPP):
 
     def send_command(self, xml, recipient):
         c = self._wrap_command(xml, recipient)
-        LOGGER.debug('Sending command {0}'.format(c))
+        _LOGGER.debug('Sending command {0}'.format(c))
         c.send()
 
     def _wrap_command(self, ctl, recipient):
@@ -129,12 +131,12 @@ class EcoVacsXMPP(ClientXMPP):
     def send_ping(self, to):
         q = self.make_iq_get(ito=to, ifrom=self._my_address())
         q.xml.append(ET.Element('ping', {'xmlns': 'urn:xmpp:ping'}))
-        LOGGER.debug("*** sending ping ***")
+        _LOGGER.debug("*** sending ping ***")
         q.send()
 
     # used some code from a sleekxmppfs plugin, seems to work fine
     def _handle_ping(self, iq):
-        LOGGER.debug("Pinged by %s", iq['from'])
+        _LOGGER.debug("Pinged by %s", iq['from'])
         iq.reply().send()
 
     def connect_and_wait_until_ready(self):
