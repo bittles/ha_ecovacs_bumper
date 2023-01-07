@@ -13,18 +13,19 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import discovery
-from homeassistant.helpers.typing import ConfigType
-import homeassistant.helpers.config_validation as cv
-import voluptuous as vol
+#from homeassistant.helpers.typing import ConfigType
+#import homeassistant.helpers.config_validation as cv
+#import voluptuous as vol
 #use local sucks
 from .sucks import EcoVacsAPI, VacBot
 from .const import (
-    ECOVACS_DEVICES,
-    DOMAIN,
+ #   ECOVACS_DEVICES,
+ #   DOMAIN,
     CONF_CONTINENT,
     LOGGER
 )
 
+"""
 CONFIG_SCHEMA = vol.Schema(
     {
         DOMAIN: vol.Schema(
@@ -39,6 +40,7 @@ CONFIG_SCHEMA = vol.Schema(
     },
     extra=vol.ALLOW_EXTRA,
 )
+"""
 
 # Generate a random device ID on each bootup
 ECOVACS_API_DEVICEID = "".join(
@@ -48,16 +50,16 @@ ECOVACS_API_DEVICEID = "".join(
 def setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Ecovacs component."""
     LOGGER.debug("Creating new Ecovacs component")
-    hass.data[ECOVACS_DEVICES] = []
+#    hass.data[ECOVACS_DEVICES] = []
     SERVER_ADDRESS = None
 
     ecovacs_api = EcoVacsAPI(
         ECOVACS_API_DEVICEID,
-        config[DOMAIN].get(CONF_USERNAME),
-        EcoVacsAPI.md5(config[DOMAIN].get(CONF_PASSWORD)),
-        config[DOMAIN].get(CONF_COUNTRY),
-        config[DOMAIN].get(CONF_CONTINENT),
-        config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
+        config_entry.data(CONF_USERNAME),
+        EcoVacsAPI.md5(config_entry.data(CONF_PASSWORD)),
+        config_entry.data(CONF_COUNTRY),
+        config_entry.data(CONF_CONTINENT),
+        config_entry.data(CONF_VERIFY_SSL), # add to class call
     )
 
     devices = ecovacs_api.devices()
@@ -75,9 +77,9 @@ def setup(hass: HomeAssistant, config: ConfigType) -> bool:
             ecovacs_api.resource,
             ecovacs_api.user_access_token,
             device,
-            config[DOMAIN].get(CONF_CONTINENT).lower(),
+            config_entry.data(CONF_CONTINENT).lower(),
             SERVER_ADDRESS, # include server address in class, if it's null should be no effect
-            config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
+            config_entry.data(CONF_VERIFY_SSL), # add to class call
             monitor=True
         )
         hass.data[ECOVACS_DEVICES].append(vacbot)

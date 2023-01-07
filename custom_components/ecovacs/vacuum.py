@@ -7,7 +7,10 @@ from typing import Any
 #sucks
 from . import sucks
 
-from homeassistant.components.vacuum import VacuumEntity, VacuumEntityFeature
+from homeassistant.components.vacuum import (
+    VacuumEntity,
+    VacuumEntityFeature,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.icon import icon_for_battery_level
@@ -20,7 +23,7 @@ _LOGGER = logging.getLogger(__name__)
 ATTR_ERROR = "error"
 ATTR_COMPONENT_PREFIX = "component_"
 
-
+"""
 def setup_platform(
     hass: HomeAssistant,
     config: ConfigType,
@@ -33,7 +36,24 @@ def setup_platform(
         vacuums.append(EcovacsVacuum(device))
     _LOGGER.debug("Adding Ecovacs Vacuums to Home Assistant: %s", vacuums)
     add_entities(vacuums, True)
+"""
 
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
+) -> None:
+    """Set up the Ecovacs vacuums."""
+    coordinator: SharkIqUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    devices: Iterable[SharkIqVacuum] = coordinator.shark_vacs.values()
+    device_names = [d.name for d in devices]
+    LOGGER.debug(
+        "Found %d Shark IQ device(s): %s",
+        len(device_names),
+        ", ".join([d.name for d in devices]),
+    )
+    async_add_entities([SharkVacuumEntity(d, coordinator) for d in devices])
 
 class EcovacsVacuum(VacuumEntity):
     """Ecovacs Vacuums such as Deebot."""
@@ -42,6 +62,7 @@ class EcovacsVacuum(VacuumEntity):
     _attr_should_poll = False
     _attr_supported_features = (
         VacuumEntityFeature.BATTERY
+        | VacuumEntityFeature.FAN_SPEED
         | VacuumEntityFeature.RETURN_HOME
         | VacuumEntityFeature.CLEAN_SPOT
         | VacuumEntityFeature.STOP
@@ -50,7 +71,7 @@ class EcovacsVacuum(VacuumEntity):
         | VacuumEntityFeature.LOCATE
         | VacuumEntityFeature.STATUS
         | VacuumEntityFeature.SEND_COMMAND
-        | VacuumEntityFeature.FAN_SPEED
+        
     )
 
     def __init__(self, device: sucks.VacBot) -> None:
@@ -75,7 +96,6 @@ class EcovacsVacuum(VacuumEntity):
 
     def on_error(self, error):
         """Handle an error event from the robot.
-
         This will not change the entity's state. If the error caused the state
         to change, that will come through as a separate on_status event
         """
@@ -126,7 +146,6 @@ class EcovacsVacuum(VacuumEntity):
         """Return the battery level of the vacuum cleaner."""
         if self.device.battery_status is not None:
             return self.device.battery_status * 100
-
         return super().battery_level
 
     @property
@@ -136,7 +155,6 @@ class EcovacsVacuum(VacuumEntity):
 
     def turn_on(self, **kwargs: Any) -> None:
         """Turn the vacuum on and start cleaning."""
-
         self.device.run(sucks.Clean())
 
     def turn_off(self, **kwargs: Any) -> None:
@@ -145,23 +163,19 @@ class EcovacsVacuum(VacuumEntity):
 
     def stop(self, **kwargs: Any) -> None:
         """Stop the vacuum cleaner."""
-
         self.device.run(sucks.Stop())
 
     def clean_spot(self, **kwargs: Any) -> None:
         """Perform a spot clean-up."""
-
         self.device.run(sucks.Spot())
 
     def locate(self, **kwargs: Any) -> None:
         """Locate the vacuum cleaner."""
-
         self.device.run(sucks.PlaySound())
 
     def set_fan_speed(self, fan_speed: str, **kwargs: Any) -> None:
         """Set fan speed."""
         if self.is_on:
-
             self.device.run(sucks.Clean(mode=self.device.clean_status, speed=fan_speed))
 
     def send_command(
@@ -178,9 +192,7 @@ class EcovacsVacuum(VacuumEntity):
         """Return the device-specific state attributes of this vacuum."""
         data: dict[str, Any] = {}
         data[ATTR_ERROR] = self._error
-
         for key, val in self.device.components.items():
             attr_name = ATTR_COMPONENT_PREFIX + key
             data[attr_name] = int(val * 100)
-
         return data
