@@ -14,6 +14,20 @@ from .sucks_api_const import *
 import logging
 LOGGER = logging.getLogger(__name__)
 
+def str_to_bool_or_cert(s):
+    if s == 'True' or s == True:
+        return True
+    elif s == 'False' or s == False:
+        return False    
+    else:
+        if not s == None:
+            if os.path.exists(s): # User could provide a path to a CA Cert as well, which is useful for Bumper
+                if os.path.isfile(s):
+                    return s
+                else:
+                    raise ValueError("Certificate path provided is not a file - {}".format(s))
+        raise ValueError("Cannot covert {} to a bool or certificate path".format(s))
+
 class EcoVacsAPI:
     CLIENT_KEY = API_CLIENT_KEY
     SECRET = API_SECRET
