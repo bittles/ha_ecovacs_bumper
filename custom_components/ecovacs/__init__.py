@@ -17,13 +17,12 @@ from homeassistant.helpers.typing import ConfigType
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
 #use local sucks
-from .sucks import EcoVacsAPI, VacBot
-from .const import (
-    ECOVACS_DEVICES,
-    DOMAIN,
-    CONF_CONTINENT,
-    LOGGER
-)
+from .sucks import VacBot
+from .sucks_api import EcoVacsAPI
+from .const import *
+
+import logging
+LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = vol.Schema(
     {
