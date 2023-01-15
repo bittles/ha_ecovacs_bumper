@@ -9,6 +9,7 @@ from paho.mqtt.client import Client  as ClientMQTT
 from paho.mqtt import publish as MQTTPublish
 from paho.mqtt import subscribe as MQTTSubscribe
 from sleekxmppfs.xmlstream import ET
+from .sucks import EcoVacsAPI
 
 from .const import LOGGER
 
