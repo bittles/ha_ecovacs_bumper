@@ -89,7 +89,7 @@ class EcoVacsIOTMQ(ClientMQTT):
 
     def schedule(self, timer_seconds, timer_function):
         self.scheduler.enter(timer_seconds, 1, self._run_scheduled_func,(timer_seconds, timer_function))
-        if not self.scheduler_thread.isAlive():
+        if not self.scheduler_thread.is_alive():
             self.scheduler_thread.start()
         
     def wait_until_ready(self):
@@ -183,7 +183,7 @@ class EcoVacsIOTMQ(ClientMQTT):
 
     def _ctl_to_dict_api(self, action, xmlstring):
         xml = ET.fromstring(xmlstring)
-        xmlchild = xml.getchildren()
+        xmlchild = list(xml)
         if len(xmlchild) > 0:
             result = xmlchild[0].attrib.copy()
             #Fix for difference in XMPP vs API response
