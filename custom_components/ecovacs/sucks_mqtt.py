@@ -10,7 +10,7 @@ from paho.mqtt import publish as MQTTPublish
 from paho.mqtt import subscribe as MQTTSubscribe
 from sleekxmppfs.xmlstream import ET
 
-from .sucks_api_const import API_REALM, API_IOTDEVMANAGERAPI
+from .sucks_api_const import API_REALM, API_IOTDEVMANAGERAPI, API_PORTAL_URL_FORMAT
 
 import logging
 LOGGER = logging.getLogger(__name__)
@@ -134,7 +134,7 @@ class EcoVacsIOTMQ(ClientMQTT):
         payloadxml.attrib.pop("td") 
         return {
             'auth': {
-                'realm': ecovacs_api_const.API_REALM,
+                'realm': API_REALM,
                 'resource': self.resource,
                 'token': self.secret,
                 'userid': self.user,
@@ -154,7 +154,7 @@ class EcoVacsIOTMQ(ClientMQTT):
         LOGGER.debug("calling iotdevmanager api with {}".format(args))
         params = {}
         params.update(args)
-        url = (ecovacs_api_const.API_PORTAL_URL_FORMAT + "/" + ecovacs_api_const.API_IOTDEVMANAGERAPI).format(continent=self.continent)
+        url = (API_PORTAL_URL_FORMAT + "/" + API_IOTDEVMANAGERAPI).format(continent=self.continent)
         response = None        
         try: #The RestAPI sometimes doesnt provide a response depending on command, reduce timeout to 3 to accomodate and make requests faster
             response = requests.post(url, json=params, timeout=3, verify=verify_ssl) #May think about having timeout as an arg that could be provided in the future
