@@ -1,7 +1,7 @@
 {
   "domain": "ecovacs",
   "name": "Ecovacs Bumper",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "documentation": "https://github.com/bittles/ha_ecovacs_bumper",
   "issue_tracker": "https://github.com/bittles/ha_ecovacs_bumper/issues",
   "requirements": ["sleekxmppfs==1.4.1", "requests>=2.18", "pycryptodome>=3.4", "pycountry-convert>=0.5", "paho-mqtt>=1.4", "stringcase>=1.2"],
