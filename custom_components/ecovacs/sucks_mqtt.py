@@ -10,7 +10,7 @@ from paho.mqtt import publish as MQTTPublish
 from paho.mqtt import subscribe as MQTTSubscribe
 from sleekxmppfs.xmlstream import ET
 
-from .sucks_api_const import API_REALM, API_IOTDEVMANAGERAPI
+from .sucks_api_const import API_REALM, API_IOTDEVMANAGERAPI, API_PORTAL_URL_FORMAT
 
 import logging
 LOGGER = logging.getLogger(__name__)
