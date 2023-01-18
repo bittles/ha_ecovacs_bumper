@@ -1,4 +1,5 @@
 # Home Assistant Ecovacs Custom Component with Bumper Support
+##CURRENTLY NOT WORKING WITH LATEST VERSION AS OF 1/18/23 USE v1.4.2 until I can look through what I effed up
 Based off the regular home assistant ecovacs components and bmartin's fork of sucks, https://github.com/bmartin5692/sucks.  Replaces built in ecovacs component, with some upgrades and fixes.  Allows SSL verification to be set to false to work with a self-hosted bumper server, https://github.com/bmartin5692/bumper, a replacement for Ecovacs servers to truly get local control.
 
 Works with bumper with my N79 and should work with other XMPP based ecovacs.  Catches some XMPP messages now that the default HASS one misses (at least with my Ecovacs), including some initial queries and also life span for filters and brushes.  Includes MQTT robot support from bmartin's fork that's basically unchanged in this since I don't have one of those robots.
