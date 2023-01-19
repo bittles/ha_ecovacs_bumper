@@ -117,28 +117,28 @@ class VacBot():
 
 #        if not error == '':
 
-"""
-Errors
-The bot broadcasts error codes for a number of cases.
 
-<ctl td="error" error="BatteryLow" errno="101"></ctl>
+# Errors
+# The bot broadcasts error codes for a number of cases.
 
-The latest error can be requested like so:
+# <ctl td="error" error="BatteryLow" errno="101"></ctl>
 
-Request <ctl td="GetError" />
-Response <ctl ret="ok" errs="100"/>
-However in some cases the robot sends to code 100 shortly after an error has occurred, meaning that we cannot trust the GetError request to contain the last relevant error. For example, if the robot gets stuck it broadcasts 102 HostHang, then proceeds to stop and broadcasts 100 NoError.
+# The latest error can be requested like so:
 
-Known error codes
+# Request <ctl td="GetError" />
+# Response <ctl ret="ok" errs="100"/>
+# However in some cases the robot sends to code 100 shortly after an error has occurred, meaning that we cannot trust the GetError request to contain the last relevant error. For example, if the robot gets stuck it broadcasts 102 HostHang, then proceeds to stop and broadcasts 100 NoError.
 
-100 NoError: Robot is operational
-101 BatteryLow: Low battery
-102 HostHang: Robot is stuck
-103 WheelAbnormal: Wheels are not moving as expected
-104 DownSensorAbnormal: Down sensor is getting abnormal values
-110 NoDustBox: Dust Bin Not installed
-These codes are taken from model M81 Pro. Error codes may differ between models.
-"""
+# Known error codes
+
+# 100 NoError: Robot is operational
+# 101 BatteryLow: Low battery
+# 102 HostHang: Robot is stuck
+# 103 WheelAbnormal: Wheels are not moving as expected
+# 104 DownSensorAbnormal: Down sensor is getting abnormal values
+# 110 NoDustBox: Dust Bin Not installed
+# These codes are taken from model M81 Pro. Error codes may differ between models.
+
 
     def _handle_life_span(self, event):
         type = event['type']
