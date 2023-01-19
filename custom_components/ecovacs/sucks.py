@@ -7,6 +7,7 @@ import os
 from sleekxmppfs.xmlstream import ET
 from sleekxmppfs.exceptions import XMPPError
 
+#from . import sucks_api
 from .sucks_mqtt import EcoVacsIOTMQ
 from .sucks_xmpp import EcoVacsXMPP
 
@@ -105,13 +106,39 @@ class VacBot():
             getattr(self, method)(ctl)
 
     def _handle_error(self, event):
-        if 'error' in event:
-            error = event['error']
-        elif 'errs' in event:
-            error = event['errs']
-        if not error == '':
+        if 'error' in event or 'errs' in event:
+            error = '' # init error var so it's available outside of first if loop
+            if 'error' in event:
+                error = event['error']
+            elif 'errs' in event:
+                error = event['errs']
             self.errorEvents.notify(error)
             LOGGER.error("*** error = " + error)
+
+#        if not error == '':
+
+"""
+Errors
+The bot broadcasts error codes for a number of cases.
+
+<ctl td="error" error="BatteryLow" errno="101"></ctl>
+
+The latest error can be requested like so:
+
+Request <ctl td="GetError" />
+Response <ctl ret="ok" errs="100"/>
+However in some cases the robot sends to code 100 shortly after an error has occurred, meaning that we cannot trust the GetError request to contain the last relevant error. For example, if the robot gets stuck it broadcasts 102 HostHang, then proceeds to stop and broadcasts 100 NoError.
+
+Known error codes
+
+100 NoError: Robot is operational
+101 BatteryLow: Low battery
+102 HostHang: Robot is stuck
+103 WheelAbnormal: Wheels are not moving as expected
+104 DownSensorAbnormal: Down sensor is getting abnormal values
+110 NoDustBox: Dust Bin Not installed
+These codes are taken from model M81 Pro. Error codes may differ between models.
+"""
 
     def _handle_life_span(self, event):
         type = event['type']
