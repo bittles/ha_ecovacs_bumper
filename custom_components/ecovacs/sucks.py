@@ -7,7 +7,7 @@ import os
 from sleekxmppfs.xmlstream import ET
 from sleekxmppfs.exceptions import XMPPError
 
-from . import sucks_api
+#from . import sucks_api
 from .sucks_mqtt import EcoVacsIOTMQ
 from .sucks_xmpp import EcoVacsXMPP
 
