@@ -21,20 +21,18 @@ ATTR_ERROR = "error"
 ATTR_COMPONENT_PREFIX = "component_"
 
 
-async def async_setup_platform(
+def setup_platform(
     hass: HomeAssistant,
     config: ConfigType,
-    async_add_entities: AddEntitiesCallback,
+    add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Set up the Ecovacs vacuums."""
     vacuums = []
-    devices: list[sucks.VacBot] = hass.data[ECOVACS_DEVICES]
-    for device in devices:
-        await hass.async_add_executor_job(device.connect_and_wait_until_ready)
+    for device in hass.data[ECOVACS_DEVICES]:
         vacuums.append(EcovacsVacuum(device))
     _LOGGER.debug("Adding Ecovacs Vacuums to Home Assistant: %s", vacuums)
-    async_add_entities(vacuums)
+    add_entities(vacuums, True)
 
 
 class EcovacsVacuum(StateVacuumEntity):
@@ -58,7 +56,7 @@ class EcovacsVacuum(StateVacuumEntity):
     def __init__(self, device: sucks.VacBot) -> None:
         """Initialize the Ecovacs Vacuum."""
         self.device = device
-
+        self.device.connect_and_wait_until_ready()
         if self.device.vacuum.get("nick") is not None:
             self._attr_name = str(self.device.vacuum["nick"])
         else:
@@ -66,6 +64,7 @@ class EcovacsVacuum(StateVacuumEntity):
             self._attr_name = str(format(self.device.vacuum["did"]))
 
         self._error = None
+        _LOGGER.debug("Vacuum initialized: %s", self.name)
 
     async def async_added_to_hass(self) -> None:
         """Set up the event listeners now that hass is ready."""
