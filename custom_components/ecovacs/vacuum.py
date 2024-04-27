@@ -7,7 +7,7 @@ from typing import Any
 #sucks
 from . import sucks
 
-from homeassistant.components.vacuum import VacuumEntity, VacuumEntityFeature
+from homeassistant.components.vacuum import StateVacuumEntity, VacuumEntityFeature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.icon import icon_for_battery_level
@@ -37,7 +37,7 @@ async def async_setup_platform(
     async_add_entities(vacuums)
 
 
-class EcovacsVacuum(VacuumEntity):
+class EcovacsVacuum(StateVacuumEntity):
     """Ecovacs Vacuums such as Deebot."""
 
     _attr_fan_speed_list = [sucks.FAN_SPEED_NORMAL, sucks.FAN_SPEED_HIGH]
