@@ -1,3 +1,6 @@
+# Latest version is 1.7.0 that includes updates that SHOULD at least let the component work with newer HASS versions.  This version includes async updates so the comoponent won't crap out on setup if it's unable to reach the vacuum.  I am unable to tset these changes since I don't have HASS currently setup and I don't have my old Ecovacs vacuum anymore (handed down to younger sis).
+# If 1.7.0 doesn't work, use version 1.6.0.  I just made the bare minimum changes to the component that again SHOULD work, but I'm unable to test it.  HASS ditched the VacuumEntity import for the vacuum component at some point and change it to StateVacuumEntity.  That's all that's included in this update.  Thanks @guillaume042 for making it easy for me by pointing me straight to a an issue with another component using VacuumEntity (though theirs was just leftover code that wasn't actually being used).
+
 # Home Assistant Ecovacs Custom Component with Bumper Support
 Based off the regular home assistant ecovacs components and bmartin's fork of sucks, https://github.com/bmartin5692/sucks.  Replaces built in ecovacs component, with some upgrades and fixes.  Allows SSL verification to be set to false to work with a self-hosted bumper server, https://github.com/bmartin5692/bumper, a replacement for Ecovacs servers to truly get local control.
 
