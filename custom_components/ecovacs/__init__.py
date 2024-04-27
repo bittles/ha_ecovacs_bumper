@@ -44,55 +44,60 @@ ECOVACS_API_DEVICEID = "".join(
     random.choice(string.ascii_uppercase + string.digits) for _ in range(8)
 )
 
-def setup(hass: HomeAssistant, config: ConfigType) -> bool:
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the Ecovacs component."""
     LOGGER.debug("Creating new Ecovacs component")
-    hass.data[ECOVACS_DEVICES] = []
+    def get_devices() -> list[VacBot]:
+        ecovacs_api = EcoVacsAPI(
+            ECOVACS_API_DEVICEID,
+            config[DOMAIN].get(CONF_USERNAME),
+            EcoVacsAPI.md5(config[DOMAIN].get(CONF_PASSWORD)),
+            config[DOMAIN].get(CONF_COUNTRY),
+            config[DOMAIN].get(CONF_CONTINENT),
+        )
+        ecovacs_devices = ecovacs_api.devices()
+        _LOGGER.debug("Ecobot devices: %s", ecovacs_devices)
+
     SERVER_ADDRESS = None
 
-    ecovacs_api = EcoVacsAPI(
-        ECOVACS_API_DEVICEID,
-        config[DOMAIN].get(CONF_USERNAME),
-        EcoVacsAPI.md5(config[DOMAIN].get(CONF_PASSWORD)),
-        config[DOMAIN].get(CONF_COUNTRY),
-        config[DOMAIN].get(CONF_CONTINENT),
-        config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
-    )
+        devices: list[VacBot] = []
+        for device in ecovacs_devices:
+            _LOGGER.info(
+                "Discovered Ecovacs device on account: %s with nickname %s",
+                device.get("did"),
+                device.get("nick"),
+            )
+            vacbot = VacBot(
+                ecovacs_api.uid,
+                ecovacs_api.REALM,
+                ecovacs_api.resource,
+                ecovacs_api.user_access_token,
+                device,
+                config[DOMAIN].get(CONF_CONTINENT).lower(),
+                config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
+                monitor=True,
+            )
 
-    devices = ecovacs_api.devices()
-    LOGGER.debug("Ecobot devices: %s", devices)
+            devices.append(vacbot)
+        return devices
 
-    for device in devices:
-        LOGGER.info(
-            "Discovered Ecovacs device on account: %s with nickname %s",
-            device.get("did"),
-            device.get("nick"),
-        )
-        vacbot = VacBot(
-            ecovacs_api.uid,
-            ecovacs_api.REALM,
-            ecovacs_api.resource,
-            ecovacs_api.user_access_token,
-            device,
-            config[DOMAIN].get(CONF_CONTINENT).lower(),
-            SERVER_ADDRESS, # include server address in class, if it's null should be no effect
-            config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
-            monitor=True
-        )
-        hass.data[ECOVACS_DEVICES].append(vacbot)
+    hass.data[ECOVACS_DEVICES] = await hass.async_add_executor_job(get_devices)
 
-    def stop(event: object) -> None:
+    async def async_stop(event: object) -> None:
         """Shut down open connections to Ecovacs XMPP server."""
-        for device in hass.data[ECOVACS_DEVICES]:
+        devices: list[VacBot] = hass.data[ECOVACS_DEVICES]
+        for device in devices:
             LOGGER.info(
                 "Shutting down connection to Ecovacs device %s",
                 device.vacuum.get("did"),
             )
-            device.disconnect()
+            await hass.async_add_executor_job(device.disconnect)
 
     # Listen for HA stop to disconnect.
-    hass.bus.listen_once(EVENT_HOMEASSISTANT_STOP, stop)
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STOP, async_stop)
     if hass.data[ECOVACS_DEVICES]:
         LOGGER.debug("Starting vacuum components")
-        discovery.load_platform(hass, Platform.VACUUM, DOMAIN, {}, config)
+        hass.async_create_task(
+            discovery.async_load_platform(hass, Platform.VACUUM, DOMAIN, {}, config)
+        )
     return True
