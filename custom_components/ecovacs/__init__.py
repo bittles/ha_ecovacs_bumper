@@ -60,26 +60,25 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     SERVER_ADDRESS = None
 
-        devices: list[VacBot] = []
-        for device in ecovacs_devices:
-            _LOGGER.info(
-                "Discovered Ecovacs device on account: %s with nickname %s",
-                device.get("did"),
-                device.get("nick"),
-            )
-            vacbot = VacBot(
-                ecovacs_api.uid,
-                ecovacs_api.REALM,
-                ecovacs_api.resource,
-                ecovacs_api.user_access_token,
-                device,
-                config[DOMAIN].get(CONF_CONTINENT).lower(),
-                config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
-                monitor=True,
-            )
-
-            devices.append(vacbot)
-        return devices
+    devices: list[VacBot] = []
+    for device in ecovacs_devices:
+        _LOGGER.info(
+            "Discovered Ecovacs device on account: %s with nickname %s",
+            device.get("did"),
+            device.get("nick"),
+        )
+        vacbot = VacBot(
+            ecovacs_api.uid,
+            ecovacs_api.REALM,
+            ecovacs_api.resource,
+            ecovacs_api.user_access_token,
+            device,
+            config[DOMAIN].get(CONF_CONTINENT).lower(),
+            config[DOMAIN].get(CONF_VERIFY_SSL), # add to class call
+            monitor=True,
+        )
+        devices.append(vacbot)
+    return devices
 
     hass.data[ECOVACS_DEVICES] = await hass.async_add_executor_job(get_devices)
 
